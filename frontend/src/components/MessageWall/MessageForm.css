@@ -1,0 +1,32 @@
+.message-form {
+    display: flex;
+    padding: 16px;
+    background-color: #18181b;
+  }
+  
+  .name-input,
+  .message-input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #3a3a3d;
+    background-color: #18181b;
+    color: white;
+    margin-right: 8px;
+  }
+  
+  .message-input {
+    resize: none;
+    height: 40px;
+  }
+  
+  .send-button {
+    padding: 8px 16px;
+    background-color: #9147ff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .send-button:hover {
+    background-color: #772ce8;
+  }

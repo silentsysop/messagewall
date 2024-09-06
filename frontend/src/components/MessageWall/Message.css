@@ -1,0 +1,60 @@
+.message {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    margin-bottom: 4px;
+    line-height: 1.4;
+    position: relative;
+}
+
+.message-author {
+    font-weight: bold;
+    margin-right: 8px;
+    color: #9147ff;  /* Twitch-tyylinen violetti väri */
+}
+
+.admin-badge {
+    background-color: #9147ff;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-right: 4px;
+}
+
+.message-time {
+    color: #adadb8;
+    font-size: 0.8em;
+    margin-right: 8px;
+}
+
+.message-content {
+    flex-basis: 100%;
+    word-break: break-word;
+    color: #efeff1;
+}
+
+.context-menu {
+    position: absolute;
+    background-color: #18181b;
+    border: 1px solid #3a3a3d;
+    border-radius: 4px;
+    padding: 8px;
+    z-index: 1000;
+    right: 0;
+    top: 100%;
+}
+
+.context-menu button {
+    background: none;
+    border: none;
+    color: #efeff1;
+    cursor: pointer;
+    padding: 4px 8px;
+    width: 100%;
+    text-align: left;
+}
+
+.context-menu button:hover {
+    background-color: #3a3a3d;
+}

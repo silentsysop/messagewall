@@ -1,0 +1,40 @@
+.navigation {
+    background-color: #333;
+    padding: 1rem;
+  }
+  
+  .navigation ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .navigation li {
+    display: inline;
+  }
+  
+  .navigation a, .navigation button {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .navigation a:hover, .navigation button:hover {
+    background-color: #555;
+  }
+  
+  @media (max-width: 600px) {
+    .navigation ul {
+      flex-direction: column;
+    }
+  
+    .navigation li {
+      margin-bottom: 0.5rem;
+    }
+  }

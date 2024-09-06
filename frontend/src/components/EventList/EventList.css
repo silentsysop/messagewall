@@ -1,0 +1,37 @@
+.event-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .event-card {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .event-card h2 {
+    margin-top: 0;
+  }
+  
+  .view-button {
+    margin-top: auto;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    background-color: #28a745;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+  }
+  
+  .view-button:hover {
+    background-color: #218838;
+  }
+  
+  @media (max-width: 600px) {
+    .event-list {
+      grid-template-columns: 1fr;
+    }
+  }
