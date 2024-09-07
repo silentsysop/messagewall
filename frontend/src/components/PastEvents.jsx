@@ -1,10 +1,10 @@
 // src/components/PastEvents.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from "./ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { CalendarIcon, LayoutGrid, List } from 'lucide-react';
+import { CalendarIcon, LayoutGrid, List, MoreVertical, Trash, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Layout from './HUDlayout';
@@ -13,10 +13,27 @@ export default function PastEvents() {
   const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [showMenu, setShowMenu] = useState({});
+  const menuRefs = useRef({});
 
   useEffect(() => {
     fetchPastEvents();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      Object.keys(showMenu).forEach((eventId) => {
+        if (showMenu[eventId] && menuRefs.current[eventId] && !menuRefs.current[eventId].contains(event.target)) {
+          setShowMenu(prev => ({ ...prev, [eventId]: false }));
+        }
+      });
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
 
   const fetchPastEvents = async () => {
     try {
@@ -24,6 +41,30 @@ export default function PastEvents() {
       setEvents(response.data);
     } catch (error) {
       console.error('Error fetching past events:', error);
+    }
+  };
+
+  const toggleMenu = (eventId) => {
+    setShowMenu(prev => ({ ...prev, [eventId]: !prev[eventId] }));
+  };
+
+  const toggleApproval = async (eventId, currentStatus) => {
+    try {
+      await api.put(`/events/${eventId}`, { requiresApproval: !currentStatus });
+      fetchPastEvents(); // Refresh the events list
+    } catch (error) {
+      console.error('Error toggling approval:', error);
+    }
+  };
+
+  const deleteEvent = async (eventId) => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      try {
+        await api.delete(`/events/${eventId}`);
+        fetchPastEvents(); // Refresh the events list
+      } catch (error) {
+        console.error('Error deleting event:', error);
+      }
     }
   };
 
@@ -55,6 +96,48 @@ export default function PastEvents() {
                 {event.organizer && event.organizer.username ? event.organizer.username : 'Unknown Organizer'}
               </span>
             </div>
+            {user && user.role === 'organizer' && (
+              <div className="relative z-20" ref={el => menuRefs.current[event._id] = el}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleMenu(event._id);
+                  }}
+                  className="relative"
+                >
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+                {showMenu[event._id] && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-background border border-muted rounded-md shadow-lg py-1 z-30">
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleApproval(event._id, event.requiresApproval);
+                      }}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      {event.requiresApproval ? 'Disable' : 'Enable'} Approval
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        deleteEvent(event._id);
+                      }}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
+                    >
+                      <Trash className="h-4 w-4 mr-2" />
+                      Delete Event
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

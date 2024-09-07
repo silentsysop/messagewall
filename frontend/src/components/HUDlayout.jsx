@@ -38,7 +38,7 @@ export default function Layout({ children }) {
         </Link>
         
         <nav className="flex items-center gap-4">
-          <Link to="/events" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
+          <Link to="/" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
             <CalendarIcon className="h-5 w-5" />
             <span className="hidden md:inline">Events</span>
           </Link>

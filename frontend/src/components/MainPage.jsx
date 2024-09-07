@@ -131,7 +131,7 @@ export default function MainPage() {
                 </AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium">
-                {event.organizer && event.organizer.username ? event.organizer.username : 'Unknown Organizer'}
+              {event.organizer && event.organizer.username ? event.organizer.username : 'Unknown Organizer'}
               </span>
             </div>
             <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 ml-auto">
