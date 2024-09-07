@@ -1,5 +1,7 @@
 const Event = require('../models/Event');
 const Message = require('../models/Message'); // Lisää tämä rivi
+const fs = require('fs').promises;
+const path = require('path');
 
 exports.createEvent = async (req, res) => {
   try {
@@ -14,7 +16,11 @@ exports.createEvent = async (req, res) => {
     });
 
     const savedEvent = await newEvent.save();
-    res.status(201).json(savedEvent);
+    
+    // Populate the organizer information
+    const populatedEvent = await Event.findById(savedEvent._id).populate('organizer', 'username');
+    
+    res.status(201).json(populatedEvent);
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');
@@ -74,7 +80,6 @@ exports.updateEvent = async (req, res) => {
 };
 
 exports.deleteEvent = async (req, res) => {
-  console.log('User attempting to delete event:', req.user);
   try {
     const event = await Event.findById(req.params.id);
     if (!event) {
@@ -85,11 +90,23 @@ exports.deleteEvent = async (req, res) => {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 
-    // Poista ensin kaikki tapahtumaan liittyvät viestit
+    // Delete the event image if it exists
+    if (event.imageUrl) {
+      const imagePath = path.join(__dirname, '..', event.imageUrl);
+      try {
+        await fs.unlink(imagePath);
+        console.log(`Deleted image: ${imagePath}`);
+      } catch (err) {
+        console.error(`Error deleting image: ${err.message}`);
+        // Continue with event deletion even if image deletion fails
+      }
+    }
+
+    // Delete all messages associated with the event
     await Message.deleteMany({ event: req.params.id });
 
-    // Sitten poista itse tapahtuma
-    await Event.deleteOne({ _id: req.params.id });
+    // Delete the event
+    await Event.findByIdAndDelete(req.params.id);
 
     res.json({ msg: 'Event and related messages removed' });
   } catch (error) {

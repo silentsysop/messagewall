@@ -223,3 +223,50 @@
     flex: 1;
     overflow: hidden;
 }
+
+.replied-message {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 2px solid #9147ff;
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.replied-to {
+    font-weight: bold;
+    color: #9147ff;
+    margin-right: 4px;
+}
+
+.replied-content {
+    color: #adadb8;
+}
+
+.message-actions {
+    display: flex;
+    align-items: center;
+}
+
+.reply-button,
+.delete-button {
+    background-color: transparent;
+    color: #adadb8;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    opacity: 0.6;
+    margin-left: 8px;
+}
+
+.reply-button:hover,
+.delete-button:hover {
+    opacity: 1;
+}
+
+.reply-button:hover {
+    color: #9147ff;
+}

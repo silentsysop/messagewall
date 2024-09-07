@@ -2,7 +2,7 @@ const Message = require('../models/Message');
 const Event = require('../models/Event');
 
 exports.createMessage = async (req, res) => {
-  const { content, eventId, name } = req.body;
+  const { content, eventId, name, replyTo } = req.body;
   const io = req.app.locals.io;
 
   try {
@@ -16,14 +16,20 @@ exports.createMessage = async (req, res) => {
       event: eventId,
       user: req.user ? req.user.id : null,
       name: req.user ? req.user.username : (name || 'Anonymous'),
-      approved: event.requiresApproval ? false : true
+      approved: event.requiresApproval ? false : true,
+      replyTo: replyTo || null
     });
 
     const savedMessage = await newMessage.save();
     
     const populatedMessage = await Message.findById(savedMessage._id)
       .populate('user', 'username role')
-      .populate('event', 'name');
+      .populate('event', 'name')
+      .populate({
+        path: 'replyTo',
+        select: 'content user name',
+        populate: { path: 'user', select: 'username' }
+      });
 
     if (savedMessage.approved) {
       io.to(eventId).emit('new message', populatedMessage);
@@ -42,6 +48,11 @@ exports.getMessages = async (req, res) => {
   try {
     const messages = await Message.find({ event: req.params.eventId, approved: true })
       .populate('user', 'username role')
+      .populate({
+        path: 'replyTo',
+        select: 'content user name',
+        populate: { path: 'user', select: 'username' }
+      })
       .sort({ createdAt: 1 });
     res.json(messages);
   } catch (error) {

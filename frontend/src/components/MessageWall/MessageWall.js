@@ -21,6 +21,7 @@ function MessageWall() {
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [replyTo, setReplyTo] = useState(null);
 
   const scrollToBottom = (behavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
@@ -121,6 +122,11 @@ function MessageWall() {
     scrollToBottom();
   };
 
+  const handleReply = (message) => {
+    setReplyTo(message);
+    scrollToBottom();
+  };
+
   return (
     <Layout>
       <div className="flex flex-col h-full bg-background">
@@ -175,6 +181,7 @@ function MessageWall() {
                   message={message}
                   canDelete={user && (user.role === 'organizer' || user._id === message.user._id)}
                   onDelete={() => deleteMessage(message._id)}
+                  onReply={handleReply}
                 />
               </motion.div>
             ))}
@@ -199,7 +206,12 @@ function MessageWall() {
             )}
           </AnimatePresence>
           <div className="p-4 bg-card border-t border-border">
-            <MessageForm eventId={id} onMessageSent={handleNewMessage} />
+            <MessageForm 
+              eventId={id} 
+              onMessageSent={handleNewMessage} 
+              replyTo={replyTo}
+              setReplyTo={setReplyTo}
+            />
           </div>
         </div>
       </div>

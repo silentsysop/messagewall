@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Message.css';
-import { Trash2 } from 'lucide-react'; // Import the trash icon
+import { Trash2, ReplyIcon } from 'lucide-react'; // Import the reply icon
 
-function Message({ message, canDelete, onDelete }) {
+function Message({ message, canDelete, onDelete, onReply }) {
   const [showMenu, setShowMenu] = useState(false);
   const [animate, setAnimate] = useState(false);
   const menuRef = useRef(null);
@@ -51,33 +51,54 @@ function Message({ message, canDelete, onDelete }) {
     }
   };
 
+  const getDisplayName = () => {
+    if (message.user && message.user.username) {
+      return message.user.username;
+    }
+    return message.name || 'Anonymous';
+  };
+
   return (
     <div 
       className={`message ${animate ? 'animate' : ''} ${canDelete ? 'can-delete' : ''}`} 
       onContextMenu={handleContextMenu}
     >
       <div className="message-bubble" ref={bubbleRef}>
+        {message.replyTo && (
+          <div className="replied-message">
+            <span className="replied-to">Replying to {message.replyTo.user ? message.replyTo.user.username : (message.replyTo.name || 'Anonymous')}:</span>
+            <span className="replied-content">{message.replyTo.content}</span>
+          </div>
+        )}
         <div className="message-header">
           <div className="message-info">
             <span className={`message-author ${isAdmin ? 'admin' : ''}`}>
               {isAdmin && <span className="admin-badge">Admin</span>}
-              {message.user ? message.user.username : (message.name || 'Anonymous')}
+              {getDisplayName()}
             </span>
             <span className="message-time">
               {new Date(message.createdAt).toLocaleTimeString()}
             </span>
           </div>
-          {canDelete && (
+          <div className="message-actions">
             <button 
-              className="delete-button" 
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
+              className="reply-button" 
+              onClick={() => onReply(message)}
             >
-              <Trash2 size={14} />
+              <ReplyIcon size={14} />
             </button>
-          )}
+            {canDelete && (
+              <button 
+                className="delete-button" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
+          </div>
         </div>
         <span className="message-content">{message.content}</span>
       </div>
