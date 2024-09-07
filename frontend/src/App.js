@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
-import EventList from './components/EventList/EventList';
 import MessageWall from './components/MessageWall/MessageWall';
 import EventCreation from './components/Admin/EventCreation';
 import Moderation from './components/Admin/Moderation';
@@ -30,36 +29,30 @@ function RequireAuth({ children, allowedRoles }) {
 function AppRoutes() {
   return (
     <Router>
-     
-      <div className="App">
-        <main className="content">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/event/:id" element={<MessageWall />} />
-            <Route 
-              path="/create-event" 
-              element={
-                <RequireAuth allowedRoles={['organizer']}>
-                  <EventCreation />
-                </RequireAuth>
-              } 
-            />
-            <Route 
-              path="/moderate" 
-              element={
-                <RequireAuth allowedRoles={['organizer']}>
-                  <Moderation />
-                </RequireAuth>
-              } 
-            />
-            <Route path="/" element={<MainPage />} />
-            <Route path="/saved-events" element={<SavedEvents />} />
-            <Route path="/past-events" element={<PastEvents />} />
-          </Routes>
-        </main>
-      </div>
-      
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/event/:id" element={<MessageWall />} />
+        <Route 
+          path="/create-event" 
+          element={
+            <RequireAuth allowedRoles={['organizer']}>
+              <EventCreation />
+            </RequireAuth>
+          } 
+        />
+        <Route 
+          path="/moderate" 
+          element={
+            <RequireAuth allowedRoles={['organizer']}>
+              <Moderation />
+            </RequireAuth>
+          } 
+        />
+        <Route path="/" element={<MainPage />} />
+        <Route path="/saved-events" element={<SavedEvents />} />
+        <Route path="/past-events" element={<PastEvents />} />
+      </Routes>
     </Router>
   );
 }

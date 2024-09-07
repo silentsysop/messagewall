@@ -8,12 +8,6 @@
     flex-grow: 1;
     overflow-y: auto;
     padding: 16px;
-    background-color: #0e0e10;  /* Twitch-tyylinen tumma tausta */
   }
   
-  h1 {
-    background-color: #18181b;
-    color: white;
-    padding: 16px;
-    margin: 0;
-  }
+ 
