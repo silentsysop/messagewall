@@ -2,15 +2,15 @@ const Event = require('../models/Event');
 const Message = require('../models/Message'); // Lisää tämä rivi
 
 exports.createEvent = async (req, res) => {
-  console.log('User attempting to create event:', req.user);
-  const { name, description, date, requiresApproval } = req.body;
   try {
+    const { name, description, date, requiresApproval } = req.body;
     const newEvent = new Event({
       name,
       description,
       date,
       organizer: req.user.id,
-      requiresApproval
+      requiresApproval,
+      imageUrl: req.file ? `/uploads/${req.file.filename}` : ''
     });
 
     const savedEvent = await newEvent.save();
@@ -21,12 +21,16 @@ exports.createEvent = async (req, res) => {
   }
 };
 
+
 exports.getEvents = async (req, res) => {
   try {
-    const events = await Event.find().populate('organizer', 'email');
+    const currentDate = new Date();
+    const events = await Event.find({ date: { $gte: currentDate } })
+      .sort({ date: 1 })
+      .populate('organizer', 'username');
     res.json(events);
   } catch (error) {
-    console.error(error.message);
+    console.error('Error fetching upcoming events:', error);
     res.status(500).send('Server error');
   }
 };
@@ -94,5 +98,18 @@ exports.deleteEvent = async (req, res) => {
       return res.status(404).json({ msg: 'Event not found' });
     }
     res.status(500).send('Server error');
+  }
+};
+
+exports.getPastEvents = async (req, res) => {
+  try {
+    const currentDate = new Date();
+    const pastEvents = await Event.find({ date: { $lt: currentDate } })
+      .sort({ date: -1 })
+      .populate('organizer', 'username');
+    res.json(pastEvents);
+  } catch (error) {
+    console.error('Error fetching past events:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

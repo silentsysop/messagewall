@@ -20,6 +20,10 @@ const UserSchema = new mongoose.Schema({
     enum: ['user', 'organizer'],
     default: 'user',
   },
+  savedEvents: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Event'
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);

@@ -8,12 +8,26 @@ function EventCreation() {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [requiresApproval, setRequiresApproval] = useState(false);
+  const [image, setImage] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('description', description);
+    formData.append('date', date);
+    formData.append('requiresApproval', requiresApproval);
+    if (image) {
+      formData.append('image', image);
+    }
+
     try {
-      const response = await api.post('/events', { name, description, date, requiresApproval });
+      const response = await api.post('/events', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       navigate(`/event/${response.data._id}`);
     } catch (error) {
       console.error('Error creating event:', error);
@@ -42,7 +56,11 @@ function EventCreation() {
         onChange={(e) => setDate(e.target.value)}
         required
       />
-
+      <input
+        type="file"
+        onChange={(e) => setImage(e.target.files[0])}
+        accept="image/*"
+      />
       <button type="submit">Create Event</button>
     </form>
   );

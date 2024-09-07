@@ -7,6 +7,8 @@ const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const path = require('path');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -29,7 +31,10 @@ app.locals.io = io;
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/users', userRoutes);
 
+// Serve static files in uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

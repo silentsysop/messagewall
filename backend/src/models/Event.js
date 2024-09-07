@@ -15,6 +15,10 @@ const EventSchema = new mongoose.Schema({
   requiresApproval: {
     type: Boolean,
     default: false
+  },
+  imageUrl: {
+    type: String,
+    default: ''
   }
 }, { timestamps: true });
 

@@ -1,14 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Navigation from './components/Navigation/Navigation';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import EventList from './components/EventList/EventList';
 import MessageWall from './components/MessageWall/MessageWall';
 import EventCreation from './components/Admin/EventCreation';
 import Moderation from './components/Admin/Moderation';
-import './App.css';
+import PastEvents from './components/PastEvents';
+
+import './globals.css';
+import MainPage from './components/MainPage'; 
+import SavedEvents from './components/SavedEvents';
 
 function RequireAuth({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -27,8 +30,8 @@ function RequireAuth({ children, allowedRoles }) {
 function AppRoutes() {
   return (
     <Router>
+     
       <div className="App">
-        <Navigation />
         <main className="content">
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -50,10 +53,13 @@ function AppRoutes() {
                 </RequireAuth>
               } 
             />
-            <Route path="/" element={<EventList />} />
+            <Route path="/" element={<MainPage />} />
+            <Route path="/saved-events" element={<SavedEvents />} />
+            <Route path="/past-events" element={<PastEvents />} />
           </Routes>
         </main>
       </div>
+      
     </Router>
   );
 }
