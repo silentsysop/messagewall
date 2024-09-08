@@ -122,9 +122,10 @@ function MessageWall() {
     scrollToBottom();
   };
 
-  const handleReply = (message) => {
+  const handleReply = (message, focusInput) => {
     setReplyTo(message);
     scrollToBottom();
+    focusInput();
   };
 
   return (

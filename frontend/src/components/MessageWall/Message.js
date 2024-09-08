@@ -83,7 +83,7 @@ function Message({ message, canDelete, onDelete, onReply }) {
           <div className="message-actions">
             <button 
               className="reply-button" 
-              onClick={() => onReply(message)}
+              onClick={() => onReply(message, () => document.getElementById('message-input').focus())}
             >
               <ReplyIcon size={14} />
             </button>

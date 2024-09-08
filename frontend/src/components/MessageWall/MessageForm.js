@@ -6,6 +6,7 @@ import { Button } from '../ui/button';
 import { SendIcon, SmileIcon, XIcon } from 'lucide-react';
 
 const emojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '🎉', '❤️', '🔥', '👀'];
+const MAX_CHARACTERS = 255;
 
 function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
   const [content, setContent] = useState('');
@@ -24,7 +25,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!content.trim() || content.length > MAX_CHARACTERS) return;
     
     try {
       const response = await api.post('/messages', { 
@@ -48,8 +49,17 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
   };
 
   const addEmoji = (emoji) => {
-    setContent(prevContent => prevContent + emoji);
+    if (content.length + emoji.length <= MAX_CHARACTERS) {
+      setContent(prevContent => prevContent + emoji);
+    }
     setShowEmojiMenu(false);
+  };
+
+  const handleContentChange = (e) => {
+    const newContent = e.target.value;
+    if (newContent.length <= MAX_CHARACTERS) {
+      setContent(newContent);
+    }
   };
 
   const getReplyToUsername = () => {
@@ -88,14 +98,18 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
         )}
         <div className="flex-grow relative">
           <Input
+            id="message-input"
             type="text"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={handleContentChange}
             placeholder={replyTo ? "Type your reply..." : "Type a message..."}
             required
             className="pr-20"
           />
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+            <span className="text-xs text-muted-foreground">
+              {content.length}/{MAX_CHARACTERS}
+            </span>
             <Button 
               type="button" 
               variant="ghost" 
@@ -121,7 +135,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
             </div>
           )}
         </div>
-        <Button type="submit" variant="primary">
+        <Button type="submit" variant="primary" disabled={content.length === 0 || content.length > MAX_CHARACTERS}>
           <SendIcon className="w-4 h-4 mr-2" />
           Send
         </Button>
