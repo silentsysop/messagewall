@@ -1,10 +1,6 @@
 .message {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    margin-bottom: 24px;
+    @apply flex flex-wrap items-baseline mb-6 relative;
     line-height: 1.5;
-    position: relative;
     opacity: 0;
     transform: translateY(20px) rotateX(-10deg);
     transition: opacity 0.4s ease-out, transform 0.4s ease-out;
@@ -17,18 +13,14 @@
 }
 
 .message-bubble {
-    background: linear-gradient(145deg, #323232, #2a2a2a);
-    border-radius: 18px;
-    padding: 12px 18px;
-    position: relative;
-    max-width: 80%;
+    @apply bg-card rounded-lg p-3 relative max-w-[80%] overflow-hidden;
     box-shadow: 
         0 4px 6px rgba(0,0,0,0.1),
         0 1px 3px rgba(0,0,0,0.08),
         inset 0 2px 2px rgba(255,255,255,0.1);
-    overflow: hidden;
     transform-style: preserve-3d;
     transition: transform 0.3s ease;
+    border-radius: 18px;
 }
 
 .message-bubble:hover {
@@ -37,99 +29,49 @@
 
 .message-bubble::before {
     content: '';
-    position: absolute;
-    bottom: -2px;
-    left: -7px;
-    height: 20px;
-    width: 20px;
-    background: linear-gradient(145deg, #323232, #2a2a2a);
-    border-bottom-right-radius: 15px;
-    z-index: -1;
+    @apply absolute -bottom-0.5 -left-[7px] h-5 w-5 rounded-br-[15px] -z-10;
+    background: var(--card);
     transform: translateZ(-1px);
 }
 
 .message-bubble::after {
     content: '';
-    position: absolute;
-    bottom: -2px;
-    left: -10px;
-    width: 10px;
-    height: 20px;
-    background-color: #0e0e10;
-    border-bottom-right-radius: 10px;
+    @apply absolute -bottom-0.5 -left-[10px] w-[10px] h-5 rounded-br-[10px] bg-background;
     transform: translateZ(-2px);
 }
 
 .message-author {
-    font-weight: bold;
-    color: #9147ff;
+    @apply font-bold text-accent whitespace-nowrap overflow-hidden text-ellipsis mr-2 flex-shrink;
     text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-right: 8px;
-    flex-shrink: 1;
 }
 
 .admin-badge {
-    background: linear-gradient(45deg, #9147ff, #a970ff);
-    color: white;
-    padding: 3px 6px;
-    border-radius: 12px;
-    font-size: 0.75em;
-    margin-right: 6px;
+    @apply bg-accent text-accent-foreground px-1.5 py-0.5 rounded-full text-xs mr-1.5 uppercase tracking-wider;
     box-shadow: 0 2px 4px rgba(145,71,255,0.3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    
 }
 
 .message-time {
-    color: #adadb8;
-    font-size: 0.8em;
-    opacity: 0.8;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-right: 8px;
+    @apply text-muted-foreground text-sm opacity-80 whitespace-nowrap flex-shrink-0 mr-2;
 }
 
 .message-content {
-    display: block;
-    word-break: break-word;
-    color: #efeff1;
-    margin-top: 6px;
-    font-size: 1.05em;
-    line-height: 1.6;
+    @apply block break-words text-foreground mt-1.5 text-[1.05em] leading-relaxed;
 }
 
 .context-menu {
-    position: absolute;
-    background: rgba(24, 24, 27, 0.95);
+    @apply absolute bg-popover border border-border rounded-lg p-2 z-[1000] right-0 top-full;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(58, 58, 61, 0.5);
-    border-radius: 8px;
-    padding: 8px;
-    z-index: 1000;
-    right: 0;
-    top: 100%;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     transform: translateY(10px);
     opacity: 0;
     transition: transform 0.3s ease, opacity 0.3s ease;
     display: none;
+    border-radius: 8px;
 }
 
 .delete-button {
-    background-color: transparent;
-    color: #adadb8;
-    border: none;
-    padding: 4px;
-    cursor: pointer;
-    transition: color 0.2s ease-in-out;
-    display: flex;
-    align-items: center;
-    opacity: 0.6;
-    flex-shrink: 0;
-    margin-left: 8px;
+    @apply bg-transparent text-muted-foreground border-none p-1 cursor-pointer transition-colors duration-200 flex items-center opacity-60 flex-shrink-0 ml-2;
 }
 
 .can-delete .message-bubble:hover .delete-button {
@@ -137,7 +79,7 @@
 }
 
 .delete-button:hover {
-    color: #ff7875;
+    @apply text-destructive;
 }
 
 .context-menu.show {
@@ -147,27 +89,22 @@
 }
 
 .context-menu button {
-    background: none;
-    border: none;
-    color: #efeff1;
-    cursor: pointer;
-    padding: 8px 12px;
-    width: 100%;
-    text-align: left;
-    transition: background-color 0.2s ease;
+    @apply bg-transparent border-none text-foreground cursor-pointer px-3 py-2 w-full text-left transition-colors duration-200 rounded;
     border-radius: 4px;
 }
 
 .context-menu button:hover {
-    background-color: rgba(58, 58, 61, 0.5);
+    @apply bg-secondary;
+    
 }
 
 .bubble {
-    position: absolute;
+    @apply absolute rounded-full;
     background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
-    border-radius: 50%;
     animation: rise 3s ease-in-out;
     opacity: 0;
+    border-radius: 50%;
+    
 }
 
 @keyframes rise {
@@ -189,20 +126,13 @@
     }
 }
 
-/* Add a subtle glow effect to messages */
 .message::after {
     content: '';
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
+    @apply absolute -top-[10px] -left-[10px] -right-[10px] -bottom-[10px] pointer-events-none -z-10;
     background: radial-gradient(ellipse at center, rgba(145,71,255,0.15) 0%, rgba(145,71,255,0) 70%);
     filter: blur(10px);
     opacity: 0;
     transition: opacity 0.3s ease;
-    pointer-events: none;
-    z-index: -1;
 }
 
 .message:hover::after {
@@ -210,56 +140,33 @@
 }
 
 .message-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
+    @apply flex justify-between items-center mb-1.5;
 }
 
 .message-info {
-    display: flex;
-    align-items: baseline;
-    min-width: 0; /* This allows the content to shrink below its minimum content size */
-    flex: 1;
-    overflow: hidden;
+    @apply flex items-baseline min-w-0 flex-1 overflow-hidden;
 }
 
 .replied-message {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-left: 2px solid #9147ff;
-    padding: 4px 8px;
-    margin-bottom: 8px;
-    border-radius: 4px;
-    font-size: 0.9em;
+    @apply bg-secondary border-l-2 border-accent p-1 px-2 mb-2 rounded text-sm;
+    
 }
 
 .replied-to {
-    font-weight: bold;
-    color: #9147ff;
-    margin-right: 4px;
+    @apply font-bold text-accent mr-1;
 }
 
 .replied-content {
-    color: #adadb8;
+    @apply text-muted-foreground;
 }
 
 .message-actions {
-    display: flex;
-    align-items: center;
+    @apply flex items-center;
 }
 
 .reply-button,
 .delete-button {
-    background-color: transparent;
-    color: #adadb8;
-    border: none;
-    padding: 4px;
-    cursor: pointer;
-    transition: color 0.2s ease-in-out;
-    display: flex;
-    align-items: center;
-    opacity: 0.6;
-    margin-left: 8px;
+    @apply bg-transparent text-muted-foreground border-none p-1 cursor-pointer transition-colors duration-200 flex items-center opacity-60 ml-2;
 }
 
 .reply-button:hover,
@@ -268,5 +175,5 @@
 }
 
 .reply-button:hover {
-    color: #9147ff;
+    @apply text-accent;
 }
