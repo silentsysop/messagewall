@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import MessageWall from './components/MessageWall/MessageWall';
@@ -61,6 +62,20 @@ function App() {
   return (
     <AuthProvider>
       <AppRoutes />
+      <Toaster 
+        position="top-center"
+        reverseOrder={true}
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: 'hsl(var(--background))',
+            color: 'hsl(var(--foreground))',
+            border: '1px solid hsl(var(--border))',
+            padding: '8px',
+            borderRadius: 'var(--radius)',
+          },
+        }}
+      />
     </AuthProvider>
   );
 }

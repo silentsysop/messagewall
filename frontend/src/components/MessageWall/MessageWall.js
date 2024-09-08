@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import socket from '../../services/socket';
 import { useAuth } from '../../context/AuthContext';
@@ -7,9 +7,10 @@ import Message from './Message';
 import MessageForm from './MessageForm';
 import './MessageWall.css';
 import Layout from '../HUDlayout';
-import { CalendarIcon, UsersIcon, ShieldIcon, ShareIcon } from 'lucide-react';
+import { CalendarIcon, UsersIcon, ShieldIcon, ShareIcon, ClockIcon, SettingsIcon, AlertTriangle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { EventSettingsModal } from '../EventSettingsModal';
 
 function MessageWall() {
   const [messages, setMessages] = useState([]);
@@ -22,6 +23,10 @@ function MessageWall() {
   const scrollContainerRef = useRef(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [replyTo, setReplyTo] = useState(null);
+  const [cooldown, setCooldown] = useState(0);
+  const [lastMessageTime, setLastMessageTime] = useState(0);
+  const [showSettingsPopup, setShowSettingsPopup] = useState(false);
+  const navigate = useNavigate();
 
   const scrollToBottom = (behavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
@@ -73,6 +78,7 @@ function MessageWall() {
     try {
       const response = await api.get(`/events/${id}`);
       setEvent(response.data);
+      setCooldown(response.data.cooldownEnabled ? response.data.cooldown : 0);
     } catch (error) {
       console.error('Error fetching event:', error);
     }
@@ -120,12 +126,28 @@ function MessageWall() {
   const handleNewMessage = () => {
     fetchMessages();
     scrollToBottom();
+    setLastMessageTime(Date.now());
+  };
+
+  const getRemainingCooldown = () => {
+    if (!cooldown) return 0;
+    const elapsed = (Date.now() - lastMessageTime) / 1000;
+    return Math.max(0, cooldown - elapsed);
   };
 
   const handleReply = (message, focusInput) => {
     setReplyTo(message);
     scrollToBottom();
     focusInput();
+  };
+
+  const handleEventUpdate = (updatedEvent) => {
+    setEvent(updatedEvent);
+    setCooldown(updatedEvent.cooldownEnabled ? updatedEvent.cooldown : 0);
+  };
+
+  const handleEventDelete = () => {
+    navigate('/'); // Redirect to home page after event deletion
   };
 
   return (
@@ -149,6 +171,16 @@ function MessageWall() {
                 >
                   <ShareIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </Button>
+                {user && user.role === 'organizer' && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                    onClick={() => setShowSettingsPopup(true)}
+                  >
+                    <SettingsIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                  </Button>
+                )}
               </div>
             </div>
             <div className="flex items-center text-muted-foreground space-x-4">
@@ -166,7 +198,29 @@ function MessageWall() {
                   <span>Moderated</span>
                 </div>
               )}
+              {cooldown > 0 && (
+                <div className="flex items-center text-primary">
+                  <ClockIcon className="w-4 h-4 mr-2" />
+                  <span>{cooldown}s cooldown</span>
+                </div>
+              )}
             </div>
+          </motion.div>
+        )}
+        {event && event.requiresApproval && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-r-lg"
+          >
+            <div className="flex items-center">
+              <AlertTriangle className="w-5 h-5 mr-2" />
+              <p className="font-medium">Message Approval Required</p>
+            </div>
+            <p className="mt-2 text-sm">
+              Messages in this event require approval before they appear. Your message will be reviewed by a moderator before being posted.
+            </p>
           </motion.div>
         )}
         <div className="flex-grow overflow-hidden flex flex-col bg-background rounded-lg shadow-lg border border-border">
@@ -212,10 +266,19 @@ function MessageWall() {
               onMessageSent={handleNewMessage} 
               replyTo={replyTo}
               setReplyTo={setReplyTo}
+              cooldown={getRemainingCooldown()}
             />
           </div>
         </div>
       </div>
+      {showSettingsPopup && (
+        <EventSettingsModal
+          event={event}
+          onClose={() => setShowSettingsPopup(false)}
+          onUpdate={handleEventUpdate}
+          onDelete={handleEventDelete}
+        />
+      )}
     </Layout>
   );
 }

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { SendIcon, SmileIcon, XIcon } from 'lucide-react';
@@ -8,12 +9,27 @@ import { SendIcon, SmileIcon, XIcon } from 'lucide-react';
 const emojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '🎉', '❤️', '🔥', '👀'];
 const MAX_CHARACTERS = 255;
 
-function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
+function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown }) {
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
   const [showNameField, setShowNameField] = useState(true);
   const [showEmojiMenu, setShowEmojiMenu] = useState(false);
   const { user } = useAuth();
+  const [remainingCooldown, setRemainingCooldown] = useState(cooldown);
+
+  useEffect(() => {
+    let timer;
+    if (remainingCooldown > 0) {
+      timer = setInterval(() => {
+        setRemainingCooldown(prev => Math.max(0, prev - 1));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [remainingCooldown]);
+
+  useEffect(() => {
+    setRemainingCooldown(cooldown);
+  }, [cooldown]);
 
   useEffect(() => {
     const savedName = sessionStorage.getItem('userName');
@@ -25,7 +41,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!content.trim() || content.length > MAX_CHARACTERS) return;
+    if (!content.trim() || content.length > MAX_CHARACTERS || remainingCooldown > 0) return;
     
     try {
       const response = await api.post('/messages', { 
@@ -42,9 +58,11 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
         setShowNameField(false);
       }
       if (onMessageSent) onMessageSent();
+      setRemainingCooldown(cooldown);
+      showSuccessToast('Message sent successfully');
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Failed to send message: ' + (error.response?.data?.error || error.message));
+      showErrorToast('Failed to send message: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -105,6 +123,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
             placeholder={replyTo ? "Type your reply..." : "Type a message..."}
             required
             className="pr-20"
+            disabled={remainingCooldown > 0}
           />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
             <span className="text-xs text-muted-foreground">
@@ -135,9 +154,13 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo }) {
             </div>
           )}
         </div>
-        <Button type="submit" variant="primary" disabled={content.length === 0 || content.length > MAX_CHARACTERS}>
-          <SendIcon className="w-4 h-4 mr-2" />
-          Send
+        <Button 
+          type="submit" 
+          variant="primary" 
+          disabled={content.length === 0 || content.length > MAX_CHARACTERS || remainingCooldown > 0}
+        >
+          <SendIcon className="h-4 w-4 mr-2" />
+          {remainingCooldown > 0 ? `Wait ${remainingCooldown.toFixed(1)}s` : 'Send'}
         </Button>
       </div>
     </form>

@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { CheckIcon, XIcon } from 'lucide-react';
 import api from '../../services/api';
 import Layout from '../HUDlayout';
+import { showSuccessToast, showErrorToast } from '../../utils/toast';
 
 function Moderation() {
   const [pendingMessages, setPendingMessages] = useState([]);
@@ -25,8 +26,10 @@ function Moderation() {
     try {
       await api.put(`/messages/approve/${messageId}`);
       fetchPendingMessages();
+      showSuccessToast('Message approved successfully');
     } catch (error) {
       console.error('Error approving message:', error);
+      showErrorToast('Failed to approve message');
     }
   };
 
@@ -34,8 +37,10 @@ function Moderation() {
     try {
       await api.delete(`/messages/${messageId}`);
       fetchPendingMessages();
+      showSuccessToast('Message deleted successfully');
     } catch (error) {
       console.error('Error deleting message:', error);
+      showErrorToast('Failed to delete message');
     }
   };
 

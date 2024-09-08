@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { Textarea } from '../ui/textarea';
+import { Checkbox } from '../ui/checkbox';
+import { Label } from '../ui/label';
+import { showSuccessToast, showErrorToast } from '../../utils/toast';
 
 function EventCreation() {
   const [name, setName] = useState('');
@@ -9,6 +14,8 @@ function EventCreation() {
   const [date, setDate] = useState('');
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [image, setImage] = useState(null);
+  const [cooldownEnabled, setCooldownEnabled] = useState(true);
+  const [cooldown, setCooldown] = useState(3);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,6 +25,8 @@ function EventCreation() {
     formData.append('description', description);
     formData.append('date', date);
     formData.append('requiresApproval', requiresApproval);
+    formData.append('cooldownEnabled', cooldownEnabled);
+    formData.append('cooldown', cooldown);
     if (image) {
       formData.append('image', image);
     }
@@ -28,15 +37,16 @@ function EventCreation() {
           'Content-Type': 'multipart/form-data'
         }
       });
+      showSuccessToast('Event created successfully');
       navigate(`/event/${response.data._id}`);
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Failed to create event');
+      showErrorToast('Failed to create event: ' + (error.response?.data?.details || error.message));
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="space-y-4">
       <input
         type="text"
         value={name}
@@ -44,7 +54,7 @@ function EventCreation() {
         placeholder="Event Name"
         required
       />
-      <textarea
+      <Textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Event Description"
@@ -61,7 +71,28 @@ function EventCreation() {
         onChange={(e) => setImage(e.target.files[0])}
         accept="image/*"
       />
-      <button type="submit">Create Event</button>
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="cooldownEnabled"
+          checked={cooldownEnabled}
+          onCheckedChange={setCooldownEnabled}
+        />
+        <Label htmlFor="cooldownEnabled">Enable message cooldown</Label>
+      </div>
+      {cooldownEnabled && (
+        <div>
+          <Label htmlFor="cooldown">Cooldown duration (seconds)</Label>
+          <Input
+            id="cooldown"
+            type="number"
+            value={cooldown}
+            onChange={(e) => setCooldown(Number(e.target.value))}
+            min="1"
+            required
+          />
+        </div>
+      )}
+      <Button type="submit">Create Event</Button>
     </form>
   );
 }

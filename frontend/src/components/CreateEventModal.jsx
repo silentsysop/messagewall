@@ -7,6 +7,7 @@ import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
 import { X } from 'lucide-react';
 import api from '../services/api';
+import { showSuccessToast, showErrorToast } from '../utils/toast';
 
 export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
   const [name, setName] = useState('');
@@ -14,6 +15,8 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
   const [date, setDate] = useState('');
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [image, setImage] = useState(null);
+  const [cooldownEnabled, setCooldownEnabled] = useState(true);
+  const [cooldown, setCooldown] = useState(3);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,8 +25,15 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
     formData.append('description', description);
     formData.append('date', date);
     formData.append('requiresApproval', requiresApproval);
+    formData.append('cooldownEnabled', cooldownEnabled);
+    formData.append('cooldown', cooldown);
     if (image) {
       formData.append('image', image);
+    }
+
+    // Log the form data for debugging
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
     }
 
     try {
@@ -32,11 +42,13 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
           'Content-Type': 'multipart/form-data'
         }
       });
+      console.log('Event created:', response.data);
       onEventCreated(response.data);
+      showSuccessToast('Event created successfully');
       onClose();
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Failed to create event: ' + (error.response?.data?.details || error.message));
+      showErrorToast('Failed to create event: ' + (error.response?.data?.details || error.message));
     }
   };
 
@@ -101,6 +113,31 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             />
             <Label htmlFor="requiresApproval" className="text-foreground">Requires Approval</Label>
           </div>
+          
+          {/* New cooldown fields */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="cooldownEnabled"
+              checked={cooldownEnabled}
+              onCheckedChange={setCooldownEnabled}
+            />
+            <Label htmlFor="cooldownEnabled" className="text-foreground">Enable message cooldown</Label>
+          </div>
+          {cooldownEnabled && (
+            <div>
+              <Label htmlFor="cooldown" className="text-foreground">Cooldown duration (seconds)</Label>
+              <Input
+                id="cooldown"
+                type="number"
+                value={cooldown}
+                onChange={(e) => setCooldown(Number(e.target.value))}
+                min="1"
+                required
+                className="bg-background text-foreground"
+              />
+            </div>
+          )}
+          
           <Button type="submit" className="w-full">Create Event</Button>
         </form>
       </div>

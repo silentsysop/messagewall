@@ -1,11 +1,17 @@
 const Message = require('../models/Message');
 const Event = require('../models/Event');
+const MAX_MESSAGE_LENGTH = 255; // Add this at the top of the file
 
 exports.createMessage = async (req, res) => {
   const { content, eventId, name, replyTo } = req.body;
   const io = req.app.locals.io;
 
   try {
+    // Add this check
+    if (!content || content.length > MAX_MESSAGE_LENGTH) {
+      return res.status(400).json({ error: `Message content must be between 1 and ${MAX_MESSAGE_LENGTH} characters.` });
+    }
+
     const event = await Event.findById(eventId);
     if (!event) {
       return res.status(404).json({ msg: 'Event not found' });

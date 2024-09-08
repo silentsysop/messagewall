@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "./ui/button"
@@ -9,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Layout from './HUDlayout';
 import { CreateEventModal } from './CreateEventModal';
+import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toast';
 
 export default function MainPage() {
   const { user } = useAuth();
@@ -62,40 +62,50 @@ export default function MainPage() {
 
   const handleLike = async (eventId) => {
     if (!user) {
-      // Redirect to login or show a message
+      showErrorToast('Please log in to save events');
       return;
     }
     try {
       if (savedEvents.includes(eventId)) {
         await api.delete(`/users/saved-events/${eventId}`);
         setSavedEvents(savedEvents.filter(id => id !== eventId));
+        //showSuccessToast('Event removed from saved events');
       } else {
         await api.post(`/users/saved-events/${eventId}`);
         setSavedEvents([...savedEvents, eventId]);
+        //showSuccessToast('Event saved successfully');
       }
     } catch (error) {
       console.error('Error updating saved events:', error);
+      showErrorToast('Failed to update saved events');
     }
   };
 
   const toggleApproval = async (eventId, currentStatus) => {
     try {
       await api.put(`/events/${eventId}`, { requiresApproval: !currentStatus });
-      fetchUpcomingEvents(); // Refresh the events list
+      fetchUpcomingEvents();
+      showSuccessToast(`Approval ${currentStatus ? 'disabled' : 'enabled'} for the event`);
     } catch (error) {
       console.error('Error toggling approval:', error);
+      showErrorToast('Failed to toggle approval');
     }
   };
 
   const deleteEvent = async (eventId) => {
-    if (window.confirm('Are you sure you want to delete this event?')) {
-      try {
-        await api.delete(`/events/${eventId}`);
-        fetchUpcomingEvents(); // Refresh the events list
-      } catch (error) {
-        console.error('Error deleting event:', error);
+    showConfirmToast(
+      'Are you sure you want to delete this event?',
+      async () => {
+        try {
+          await api.delete(`/events/${eventId}`);
+          fetchUpcomingEvents();
+          showSuccessToast('Event deleted successfully');
+        } catch (error) {
+          console.error('Error deleting event:', error);
+          showErrorToast('Failed to delete event');
+        }
       }
-    }
+    );
   };
 
   const toggleMenu = (eventId) => {

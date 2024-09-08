@@ -5,13 +5,15 @@ const path = require('path');
 
 exports.createEvent = async (req, res) => {
   try {
-    const { name, description, date, requiresApproval } = req.body;
+    const { name, description, date, requiresApproval, cooldownEnabled, cooldown } = req.body;
     const newEvent = new Event({
       name,
       description,
       date,
       organizer: req.user.id,
-      requiresApproval,
+      requiresApproval: requiresApproval === 'true',
+      cooldownEnabled: cooldownEnabled === 'true',
+      cooldown: parseInt(cooldown, 10),
       imageUrl: req.file ? `/uploads/${req.file.filename}` : ''
     });
 
@@ -22,8 +24,8 @@ exports.createEvent = async (req, res) => {
     
     res.status(201).json(populatedEvent);
   } catch (error) {
-    console.error(error.message);
-    res.status(500).send('Server error');
+    console.error('Error creating event:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
   }
 };
 
@@ -58,7 +60,6 @@ exports.getEvent = async (req, res) => {
 };
 
 exports.updateEvent = async (req, res) => {
-  const { requiresApproval } = req.body;
   try {
     let event = await Event.findById(req.params.id);
     if (!event) {
@@ -69,13 +70,31 @@ exports.updateEvent = async (req, res) => {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 
-    event.requiresApproval = requiresApproval;
+    // Only update fields that are provided in the request body
+    if (req.body.name !== undefined) event.name = req.body.name;
+    if (req.body.description !== undefined) event.description = req.body.description;
+    if (req.body.requiresApproval !== undefined) event.requiresApproval = req.body.requiresApproval;
+    if (req.body.cooldownEnabled !== undefined) event.cooldownEnabled = req.body.cooldownEnabled;
+    if (req.body.cooldown !== undefined) event.cooldown = req.body.cooldown;
+
+    if (req.body.clearImage) {
+      // Delete the old image file if it exists
+      if (event.imageUrl) {
+        const oldImagePath = path.join(__dirname, '..', event.imageUrl);
+        try {
+          await fs.unlink(oldImagePath);
+        } catch (error) {
+          console.error('Error deleting old image:', error);
+        }
+      }
+      event.imageUrl = '';
+    }
 
     await event.save();
     res.json(event);
   } catch (error) {
-    console.error(error.message);
-    res.status(500).send('Server error');
+    console.error('Error updating event:', error);
+    res.status(500).json({ error: 'Server error', details: error.message });
   }
 };
 

@@ -19,7 +19,15 @@ const EventSchema = new mongoose.Schema({
   imageUrl: {
     type: String,
     default: ''
-  }
+  },
+  cooldown: {
+    type: Number,
+    default: 3, // Default cooldown of 3 seconds
+  },
+  cooldownEnabled: {
+    type: Boolean,
+    default: true,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Event', EventSchema);

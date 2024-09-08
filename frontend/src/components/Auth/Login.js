@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../ui/card";
@@ -16,9 +17,10 @@ function Login() {
     e.preventDefault();
     try {
       await login(email, password);
+      showSuccessToast('Logged in successfully');
       navigate('/');
     } catch (error) {
-      alert(error.response?.data?.error || 'An error occurred');
+      showErrorToast(error.response?.data?.error || 'An error occurred during login');
     }
   };
 
