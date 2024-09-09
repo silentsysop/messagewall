@@ -8,6 +8,7 @@ import { CalendarIcon, LayoutGrid, List, MoreVertical, Trash, MessageCircle } fr
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Layout from './HUDlayout';
+import { format } from 'date-fns';
 
 export default function PastEvents() {
   const { user } = useAuth();
@@ -83,7 +84,9 @@ export default function PastEvents() {
         </div>
         <div className={`flex flex-col ${viewMode === 'list' ? 'flex-1' : ''}`}>
           <h3 className="text-lg font-semibold">{event.name}</h3>
-          <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString()}</p>
+          <p className="text-sm text-muted-foreground">
+            {format(new Date(event.startTime), 'PPP p')} - {format(new Date(event.endTime), 'PPP p')}
+          </p>
           <p className="mt-2 text-sm flex-grow">{event.description}</p>
           <div className="mt-4 flex items-center justify-between">
             <div className="flex items-center gap-2">

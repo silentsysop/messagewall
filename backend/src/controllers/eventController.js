@@ -2,14 +2,16 @@ const Event = require('../models/Event');
 const Message = require('../models/Message'); // Lisää tämä rivi
 const fs = require('fs').promises;
 const path = require('path');
+const moment = require('moment');
 
 exports.createEvent = async (req, res) => {
   try {
-    const { name, description, date, requiresApproval, cooldownEnabled, cooldown } = req.body;
+    const { name, description, startTime, endTime, requiresApproval, cooldownEnabled, cooldown } = req.body;
     const newEvent = new Event({
       name,
       description,
-      date,
+      startTime,
+      endTime,
       organizer: req.user.id,
       requiresApproval: requiresApproval === 'true',
       cooldownEnabled: cooldownEnabled === 'true',
@@ -19,7 +21,6 @@ exports.createEvent = async (req, res) => {
 
     const savedEvent = await newEvent.save();
     
-    // Populate the organizer information
     const populatedEvent = await Event.findById(savedEvent._id).populate('organizer', 'username');
     
     res.status(201).json(populatedEvent);
@@ -29,12 +30,11 @@ exports.createEvent = async (req, res) => {
   }
 };
 
-
 exports.getEvents = async (req, res) => {
   try {
     const currentDate = new Date();
-    const events = await Event.find({ date: { $gte: currentDate } })
-      .sort({ date: 1 })
+    const events = await Event.find({ endTime: { $gte: currentDate } })
+      .sort({ startTime: 1 })
       .populate('organizer', 'username');
     res.json(events);
   } catch (error) {
@@ -76,6 +76,8 @@ exports.updateEvent = async (req, res) => {
     if (req.body.requiresApproval !== undefined) event.requiresApproval = req.body.requiresApproval;
     if (req.body.cooldownEnabled !== undefined) event.cooldownEnabled = req.body.cooldownEnabled;
     if (req.body.cooldown !== undefined) event.cooldown = req.body.cooldown;
+    if (req.body.startTime !== undefined) event.startTime = new Date(req.body.startTime);
+    if (req.body.endTime !== undefined) event.endTime = new Date(req.body.endTime);
 
     if (req.body.clearImage) {
       // Delete the old image file if it exists
@@ -89,6 +91,8 @@ exports.updateEvent = async (req, res) => {
       }
       event.imageUrl = '';
     }
+
+    console.log('Updating event with data:', event); // Add this line for debugging
 
     await event.save();
     res.json(event);
@@ -140,8 +144,8 @@ exports.deleteEvent = async (req, res) => {
 exports.getPastEvents = async (req, res) => {
   try {
     const currentDate = new Date();
-    const pastEvents = await Event.find({ date: { $lt: currentDate } })
-      .sort({ date: -1 })
+    const pastEvents = await Event.find({ endTime: { $lt: currentDate } })
+      .sort({ endTime: -1 })
       .populate('organizer', 'username');
     res.json(pastEvents);
   } catch (error) {

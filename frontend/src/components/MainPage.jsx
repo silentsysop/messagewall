@@ -9,6 +9,7 @@ import api from '../services/api';
 import Layout from './HUDlayout';
 import { CreateEventModal } from './CreateEventModal';
 import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toast';
+import { format, formatDistanceToNow, isToday, isTomorrow, differenceInDays, differenceInHours, isFuture, isPast } from 'date-fns';
 
 export default function MainPage() {
   const { user } = useAuth();
@@ -40,6 +41,17 @@ export default function MainPage() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showMenu]);
+
+  useEffect(() => {
+    const checkEndedEvents = () => {
+      const now = new Date();
+      setEvents(prevEvents => prevEvents.filter(event => new Date(event.endTime) > now));
+    };
+
+    const intervalId = setInterval(checkEndedEvents, 60000); // Check every minute
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   const fetchUpcomingEvents = async () => {
     try {
@@ -116,97 +128,145 @@ export default function MainPage() {
     setEvents(prevEvents => [newEvent, ...prevEvents]);
   };
 
-  const renderEventCard = (event) => (
-    <Card key={event._id} className={`group relative rounded-lg shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl ${viewMode === 'list' ? 'flex' : ''}`}>
-      <Link to={`/event/${event._id}`} className="absolute inset-0 z-10">
-        <span className="sr-only">View event</span>
-      </Link>
-      <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
-        <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
-          <img 
-            src={event.imageUrl ? `http://localhost:5000${event.imageUrl}` : './placeholder.jpg'} 
-            alt={event.name} 
-            className="absolute inset-0 h-full w-full object-cover rounded-md"
-          />
-        </div>
-        <div className={`flex flex-col ${viewMode === 'list' ? 'flex-1' : ''}`}>
-          <h3 className="text-lg font-semibold">{event.name}</h3>
-          <p className="text-sm text-muted-foreground">{new Date(event.date).toLocaleDateString()}</p>
-          <p className="mt-2 text-sm flex-grow">{event.description}</p>
-          <div className="mt-4 flex flex-wrap items-center justify-between">
-            <div className="flex items-center gap-2 mb-2 sm:mb-0">
-              <Avatar className="h-8 w-8 border-2 border-background">
-                <AvatarFallback>
-                  {event.organizer && event.organizer.username ? event.organizer.username[0] : '?'}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium">
-              {event.organizer && event.organizer.username ? event.organizer.username : 'Unknown Organizer'}
-              </span>
+  const renderEventCard = (event) => {
+    const startDate = new Date(event.startTime);
+    const endDate = new Date(event.endTime);
+    const now = new Date();
+
+    const formatEventTime = (date) => {
+      if (isToday(date)) {
+        return `Today at ${format(date, 'h:mm a')}`;
+      } else if (isTomorrow(date)) {
+        return `Tomorrow at ${format(date, 'h:mm a')}`;
+      } else {
+        return format(date, 'MMM d, yyyy h:mm a');
+      }
+    };
+
+    const getEventStatus = () => {
+      if (isFuture(startDate)) {
+        return `Starts ${formatDistanceToNow(startDate, { addSuffix: true })}`;
+      } else if (isFuture(endDate)) {
+        return `Ends ${formatDistanceToNow(endDate, { addSuffix: true })}`;
+      } else {
+        return 'Event has ended';
+      }
+    };
+
+    const getDuration = () => {
+      const durationHours = differenceInHours(endDate, startDate);
+      const days = Math.floor(durationHours / 24);
+      const remainingHours = durationHours % 24;
+
+      if (days === 0) {
+        return `${durationHours} hour${durationHours !== 1 ? 's' : ''}`;
+      } else {
+        let duration = `${days} day${days !== 1 ? 's' : ''}`;
+        if (remainingHours > 0) {
+          duration += ` ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`;
+        }
+        return duration;
+      }
+    };
+
+    return (
+      <Card key={event._id} className={`group relative rounded-lg shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl ${viewMode === 'list' ? 'flex' : ''}`}>
+        <Link to={`/event/${event._id}`} className="absolute inset-0 z-10">
+          <span className="sr-only">View event</span>
+        </Link>
+        <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
+          <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
+            <img 
+              src={event.imageUrl ? `http://localhost:5000${event.imageUrl}` : './placeholder.jpg'} 
+              alt={event.name} 
+              className="absolute inset-0 h-full w-full object-cover rounded-md"
+            />
+          </div>
+          <div className={`flex flex-col ${viewMode === 'list' ? 'flex-1' : ''}`}>
+            <h3 className="text-lg font-semibold">{event.name}</h3>
+            <div className="mt-1 space-y-1">
+              <p className="text-sm font-medium text-green-600">{getEventStatus()}</p>
+              <p className="text-sm text-muted-foreground">
+                {formatEventTime(startDate)} - {format(endDate, 'MMM d, yyyy h:mm a')}
+              </p>
+              <p className="text-sm text-muted-foreground">Duration: {getDuration()}</p>
             </div>
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 ml-auto">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleLike(event._id);
-                }}
-                className="z-20 relative"
-              >
-                <HeartIcon 
-                  className={`h-5 w-5 ${savedEvents.includes(event._id) ? 'fill-current text-red-500' : 'text-gray-500'}`} 
-                />
-              </Button>
-              {user && user.role === 'organizer' && (
-                <div className="relative z-20" ref={el => menuRefs.current[event._id] = el}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleMenu(event._id);
-                    }}
-                    className="relative"
-                  >
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                  {showMenu[event._id] && (
-                    <div className="absolute right-0 top-full mt-2 w-48 bg-background border border-muted rounded-md shadow-lg py-1 z-30">
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          toggleApproval(event._id, event.requiresApproval);
-                        }}
-                        className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
-                      >
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        {event.requiresApproval ? 'Disable' : 'Enable'} Approval
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          deleteEvent(event._id);
-                        }}
-                        className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
-                      >
-                        <Trash className="h-4 w-4 mr-2" />
-                        Delete Event
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+            <p className="mt-2 text-sm flex-grow line-clamp-2">{event.description}</p>
+            <div className="mt-4 flex flex-wrap items-center justify-between">
+              <div className="flex items-center gap-2 mb-2 sm:mb-0">
+                <Avatar className="h-8 w-8 border-2 border-background">
+                  <AvatarFallback>
+                    {event.organizer && event.organizer.username ? event.organizer.username[0] : '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm font-medium">
+                {event.organizer && event.organizer.username ? event.organizer.username : 'Unknown Organizer'}
+                </span>
+              </div>
+              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 ml-auto">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleLike(event._id);
+                  }}
+                  className="z-20 relative"
+                >
+                  <HeartIcon 
+                    className={`h-5 w-5 ${savedEvents.includes(event._id) ? 'fill-current text-red-500' : 'text-gray-500'}`} 
+                  />
+                </Button>
+                {user && user.role === 'organizer' && (
+                  <div className="relative z-20" ref={el => menuRefs.current[event._id] = el}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleMenu(event._id);
+                      }}
+                      className="relative"
+                    >
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                    {showMenu[event._id] && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-background border border-muted rounded-md shadow-lg py-1 z-30">
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleApproval(event._id, event.requiresApproval);
+                          }}
+                          className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          {event.requiresApproval ? 'Disable' : 'Enable'} Approval
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            deleteEvent(event._id);
+                          }}
+                          className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
+                        >
+                          <Trash className="h-4 w-4 mr-2" />
+                          Delete Event
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <Layout>

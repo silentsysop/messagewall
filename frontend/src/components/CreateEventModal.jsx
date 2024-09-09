@@ -8,10 +8,13 @@ import { Checkbox } from "./ui/checkbox";
 import { X } from 'lucide-react';
 import api from '../services/api';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
+import { format } from 'date-fns';
 
 export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [date, setDate] = useState('');
   const [requiresApproval, setRequiresApproval] = useState(false);
   const [image, setImage] = useState(null);
@@ -23,17 +26,13 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
     const formData = new FormData();
     formData.append('name', name);
     formData.append('description', description);
-    formData.append('date', date);
+    formData.append('startTime', startTime);
+    formData.append('endTime', endTime);
     formData.append('requiresApproval', requiresApproval);
     formData.append('cooldownEnabled', cooldownEnabled);
     formData.append('cooldown', cooldown);
     if (image) {
       formData.append('image', image);
-    }
-
-    // Log the form data for debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
     }
 
     try {
@@ -85,12 +84,23 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             />
           </div>
           <div>
-            <Label htmlFor="date" className="text-foreground">Date</Label>
+            <Label htmlFor="startTime" className="text-foreground">Start Time</Label>
             <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              id="startTime"
+              type="datetime-local"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              required
+              className="bg-background text-foreground [color-scheme:dark]"
+            />
+          </div>
+          <div>
+            <Label htmlFor="endTime" className="text-foreground">End Time</Label>
+            <Input
+              id="endTime"
+              type="datetime-local"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
               required
               className="bg-background text-foreground [color-scheme:dark]"
             />

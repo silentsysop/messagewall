@@ -6,7 +6,14 @@ const EventSchema = new mongoose.Schema({
     required: true,
   },
   description: String,
-  date: Date,
+  startTime: {
+    type: Date,
+    required: true,
+  },
+  endTime: {
+    type: Date,
+    required: true,
+  },
   organizer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -22,7 +29,7 @@ const EventSchema = new mongoose.Schema({
   },
   cooldown: {
     type: Number,
-    default: 3, // Default cooldown of 3 seconds
+    default: 3,
   },
   cooldownEnabled: {
     type: Boolean,

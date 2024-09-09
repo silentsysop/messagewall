@@ -11,6 +11,7 @@ import { CalendarIcon, UsersIcon, ShieldIcon, ShareIcon, ClockIcon, SettingsIcon
 import { Button } from '../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventSettingsModal } from '../EventSettingsModal';
+import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
 
 function MessageWall() {
   const [messages, setMessages] = useState([]);
@@ -150,6 +151,21 @@ function MessageWall() {
     navigate('/'); // Redirect to home page after event deletion
   };
 
+  const formatEventStartTime = (date) => {
+    const now = new Date();
+    const startDate = new Date(date);
+    
+    if (isToday(startDate)) {
+      return `Today at ${format(startDate, 'h:mm a')}`;
+    } else if (isTomorrow(startDate)) {
+      return `Tomorrow at ${format(startDate, 'h:mm a')}`;
+    } else if (differenceInDays(startDate, now) < 7) {
+      return format(startDate, 'EEEE \'at\' h:mm a'); // e.g., "Friday at 2:30 PM"
+    } else {
+      return format(startDate, 'MMM d \'at\' h:mm a'); // e.g., "Jun 15 at 2:30 PM"
+    }
+  };
+
   return (
     <Layout>
       <div className="flex flex-col h-full bg-background">
@@ -186,7 +202,7 @@ function MessageWall() {
             <div className="flex items-center text-muted-foreground space-x-4">
               <div className="flex items-center">
                 <CalendarIcon className="w-4 h-4 mr-2" />
-                <span>{new Date(event.date).toLocaleDateString()}</span>
+                <span>{formatEventStartTime(event.startTime)}</span>
               </div>
               <div className="flex items-center">
                 <UsersIcon className="w-4 h-4 mr-2" />

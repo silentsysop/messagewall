@@ -6,6 +6,7 @@ import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import api from '../services/api';
 import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toast';
+import { format } from 'date-fns';
 
 export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
   const [name, setName] = useState(event.name);
@@ -16,6 +17,8 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(event.imageUrl ? `http://localhost:5000${event.imageUrl}` : null);
   const [clearImage, setClearImage] = useState(false);
+  const [startTime, setStartTime] = useState(format(new Date(event.startTime), "yyyy-MM-dd'T'HH:mm"));
+  const [endTime, setEndTime] = useState(format(new Date(event.endTime), "yyyy-MM-dd'T'HH:mm"));
 
   const handleImageChange = (e) => {
     if (e.target.files[0]) {
@@ -40,8 +43,12 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
         requiresApproval,
         cooldownEnabled,
         cooldown,
-        clearImage
+        clearImage,
+        startTime: new Date(startTime).toISOString(),
+        endTime: new Date(endTime).toISOString()
       };
+
+      console.log('Sending updated event data:', updatedEventData); // Add this line for debugging
 
       let response = await api.put(`/events/${event._id}`, updatedEventData);
 
@@ -56,6 +63,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
       }
 
       showSuccessToast('Event updated successfully');
+      onUpdate(response.data);
       onClose();
     } catch (error) {
       console.error('Error updating event:', error);
@@ -81,41 +89,68 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-background border border-border rounded-lg p-8 max-w-md w-full shadow-lg">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Event Settings</h2>
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-background border border-border rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-lg">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Event Settings</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name">Event Name</Label>
+            <Label htmlFor="name" className="text-sm sm:text-base">Event Name</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              className="mt-1"
             />
           </div>
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-sm sm:text-base">Description</Label>
             <Input
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required
+              className="mt-1"
             />
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="startTime" className="text-sm sm:text-base">Start Time</Label>
+              <Input
+                id="startTime"
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                required
+                className="mt-1 bg-background text-foreground [color-scheme:dark]"
+              />
+            </div>
+            <div>
+              <Label htmlFor="endTime" className="text-sm sm:text-base">End Time</Label>
+              <Input
+                id="endTime"
+                type="datetime-local"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                required
+                className="mt-1 bg-background text-foreground [color-scheme:dark]"
+              />
+            </div>
+          </div>
           <div>
-            <Label htmlFor="image">Event Image</Label>
-            <div className="flex items-center space-x-2">
+            <Label htmlFor="image" className="text-sm sm:text-base">Event Image</Label>
+            <div className="flex items-center space-x-2 mt-1">
               <Input
                 id="image"
                 type="file"
                 onChange={handleImageChange}
                 accept="image/*"
+                className="flex-grow"
               />
               {imagePreview && !clearImage && (
                 <Button type="button" onClick={handleClearImage} variant="destructive" size="icon">
@@ -135,7 +170,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
               checked={requiresApproval}
               onCheckedChange={setRequiresApproval}
             />
-            <Label htmlFor="requiresApproval">Requires Approval</Label>
+            <Label htmlFor="requiresApproval" className="text-sm sm:text-base">Requires Approval</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -143,11 +178,11 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
               checked={cooldownEnabled}
               onCheckedChange={setCooldownEnabled}
             />
-            <Label htmlFor="cooldownEnabled">Enable message cooldown</Label>
+            <Label htmlFor="cooldownEnabled" className="text-sm sm:text-base">Enable message cooldown</Label>
           </div>
           {cooldownEnabled && (
             <div>
-              <Label htmlFor="cooldown">Cooldown duration (seconds)</Label>
+              <Label htmlFor="cooldown" className="text-sm sm:text-base">Cooldown duration (seconds)</Label>
               <Input
                 id="cooldown"
                 type="number"
@@ -155,6 +190,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
                 onChange={(e) => setCooldown(Number(e.target.value))}
                 min="1"
                 required
+                className="mt-1"
               />
             </div>
           )}

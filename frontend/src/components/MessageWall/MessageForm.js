@@ -160,7 +160,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown }) 
           disabled={content.length === 0 || content.length > MAX_CHARACTERS || remainingCooldown > 0}
         >
           <SendIcon className="h-4 w-4 mr-2" />
-          {remainingCooldown > 0 ? `Wait ${remainingCooldown.toFixed(1)}s` : 'Send'}
+          {remainingCooldown > 0 ? `Wait ${remainingCooldown.toFixed(0)}s` : 'Send'}
         </Button>
       </div>
     </form>
