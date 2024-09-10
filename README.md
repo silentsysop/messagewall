@@ -94,3 +94,6 @@ To give yourself organizer/admin privileges:
 
 6. Open your browser and navigate to `http://localhost:3000`
 
+## 📄 License
+
+This project is licensed under the Apache License, Version 2.0 - see the [LICENSE](LICENSE) file for details.
