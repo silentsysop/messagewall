@@ -11,3 +11,5 @@ class ResizeObserver {
 }
 
 window.ResizeObserver = ResizeObserver;
+
+global.setImmediate = (callback) => setTimeout(callback, 0);
