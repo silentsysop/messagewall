@@ -47,30 +47,46 @@ function EventCreation() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Event Name"
-        required
-      />
-      <Textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Event Description"
-        required
-      />
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        required
-      />
-      <input
-        type="file"
-        onChange={(e) => setImage(e.target.files[0])}
-        accept="image/*"
-      />
+      <div>
+        <Label htmlFor="eventName">Event Name</Label>
+        <Input
+          id="eventName"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Event Name"
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="eventDescription">Event Description</Label>
+        <Textarea
+          id="eventDescription"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Event Description"
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="eventDate">Date</Label>
+        <Input
+          id="eventDate"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="eventImage">Event Image</Label>
+        <Input
+          id="eventImage"
+          type="file"
+          onChange={(e) => setImage(e.target.files[0])}
+          accept="image/*"
+        />
+      </div>
       <div className="flex items-center space-x-2">
         <Checkbox
           id="cooldownEnabled"
