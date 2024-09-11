@@ -135,6 +135,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown }) 
               size="icon" 
               className="h-8 w-8"
               onClick={() => setShowEmojiMenu(!showEmojiMenu)}
+              aria-label="Add emoji"
             >
               <SmileIcon className="w-4 h-4" />
             </Button>
