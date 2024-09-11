@@ -5,6 +5,7 @@ import { Button } from "./ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar"
 import { SearchIcon, BellIcon, CalendarIcon, LogInIcon, UserPlusIcon, ShieldIcon, LogOutIcon, HeartIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { ThemeToggle } from './ui/ThemeToggle';
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
@@ -90,6 +91,7 @@ export default function Layout({ children }) {
               </Link>
             </>
           )}
+          <ThemeToggle />
         </nav>
       </header>
       
