@@ -173,7 +173,7 @@ function MessageWall() {
 
   return (
     <Layout>
-      <div className={`flex flex-col h-full bg-background ${spectateMode ? 'fixed inset-0 z-50' : ''}`}>
+      <div className={`flex flex-col h-full bg-background ${spectateMode ? 'fixed inset-0 z-50 spectate-mode' : ''}`}>
         {!spectateMode && event && (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
@@ -249,7 +249,7 @@ function MessageWall() {
             </div>
           </motion.div>
         )}
-        <div className={`flex-grow overflow-hidden flex flex-col bg-background rounded-lg shadow-lg  ${spectateMode ? 'h-full' : 'border border-border'}`}>
+        <div className={`flex-grow overflow-hidden flex flex-col bg-background rounded-lg shadow-lg ${spectateMode ? 'h-full' : 'border border-border'}`}>
           <div className="flex-grow overflow-y-auto p-4 scroll-smooth" ref={scrollContainerRef}>
             {messages.map((message, index) => (
               <motion.div
@@ -291,7 +291,7 @@ function MessageWall() {
             )}
           </AnimatePresence>
           {!spectateMode && (
-            <div className="message-form-container">
+            <div className="p-4 bg-background border-t border-border">
               <MessageForm 
                 eventId={id} 
                 onMessageSent={handleNewMessage} 

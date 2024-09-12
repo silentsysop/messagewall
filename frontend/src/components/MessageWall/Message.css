@@ -177,3 +177,40 @@
 .reply-button:hover {
     @apply text-accent;
 }
+
+/* Add this new section at the end of the file */
+.spectate-mode .message {
+    font-size: 1.2em;
+}
+
+.spectate-mode .message-bubble {
+    max-width: 90%;
+}
+
+.spectate-mode .message-content {
+    font-size: 1.2em;
+}
+
+@media (min-width: 1024px) {
+    .spectate-mode .message {
+        font-size: 1.5em;
+    }
+
+    .spectate-mode .message-bubble {
+        max-width: 95%;
+    }
+
+    .spectate-mode .message-content {
+        font-size: 1.5em;
+    }
+}
+
+@media (min-width: 1440px) {
+    .spectate-mode .message {
+        font-size: 1.8em;
+    }
+
+    .spectate-mode .message-content {
+        font-size: 1.8em;
+    }
+}
