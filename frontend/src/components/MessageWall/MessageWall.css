@@ -10,4 +10,15 @@
     padding: 16px;
   }
   
- 
+  .message-form-container {
+    padding: 8px;
+    background-color: var(--background);
+    border-top: 1px solid var(--border);
+  }
+  
+  @media (min-width: 640px) {
+    .message-form-container {
+      padding: 16px;
+    }
+  }
+

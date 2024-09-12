@@ -174,50 +174,50 @@ function MessageWall() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-card shadow-md p-6 mb-4 rounded-lg"
+            className="bg-card shadow-md p-2 sm:p-4 mb-2 sm:mb-4 rounded-lg"
           >
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-3xl font-bold text-foreground">{event.name}</h1>
-              <div className="flex space-x-2">
+            <div className="flex justify-between items-center mb-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate mr-2">{event.name}</h1>
+              <div className="flex space-x-1 sm:space-x-2 flex-shrink-0">
                 <Button 
                   variant="ghost" 
-                  size="icon" 
+                  size="sm"
                   className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
                   onClick={handleShare}
                 >
-                  <ShareIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                  <ShareIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
                 </Button>
                 {user && user.role === 'organizer' && (
                   <Button
                     variant="ghost"
-                    size="icon"
+                    size="sm"
                     className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
                     onClick={() => setShowSettingsPopup(true)}
                   >
-                    <SettingsIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    <SettingsIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
                   </Button>
                 )}
               </div>
             </div>
-            <div className="flex items-center text-muted-foreground space-x-4">
+            <div className="flex flex-wrap items-center text-xs sm:text-sm text-muted-foreground gap-2">
               <div className="flex items-center">
-                <CalendarIcon className="w-4 h-4 mr-2" />
+                <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 <span>{formatEventStartTime(event.startTime)}</span>
               </div>
               <div className="flex items-center">
-                <UsersIcon className="w-4 h-4 mr-2" />
-                <span>{activeUsers} active {activeUsers === 1 ? 'user' : 'users'}</span>
+                <UsersIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <span>{activeUsers} active</span>
               </div>
               {event.requiresApproval && (
                 <div className="flex items-center text-primary">
-                  <ShieldIcon className="w-4 h-4 mr-2" />
+                  <ShieldIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                   <span>Moderated</span>
                 </div>
               )}
               {cooldown > 0 && (
                 <div className="flex items-center text-primary">
-                  <ClockIcon className="w-4 h-4 mr-2" />
-                  <span>{cooldown}s cooldown</span>
+                  <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                  <span>{cooldown}s</span>
                 </div>
               )}
             </div>
@@ -228,15 +228,12 @@ function MessageWall() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
-            className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-r-lg"
+            className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 sm:p-4 mb-2 sm:mb-4 rounded-r-lg text-xs sm:text-sm"
           >
             <div className="flex items-center">
-              <AlertTriangle className="w-5 h-5 mr-2" />
+              <AlertTriangle className="w-4 h-4 mr-2" />
               <p className="font-medium">Message Approval Required</p>
             </div>
-            <p className="mt-2 text-sm">
-              Messages in this event require approval before they appear. Your message will be reviewed by a moderator before being posted.
-            </p>
           </motion.div>
         )}
         <div className="flex-grow overflow-hidden flex flex-col bg-background rounded-lg shadow-lg border border-border">
@@ -265,7 +262,11 @@ function MessageWall() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.2 }}
-                className="absolute bottom-20 right-8"
+                className={`absolute right-4 sm:right-8 z-10 ${
+                  user 
+                    ? 'bottom-28 sm:bottom-20' 
+                    : 'bottom-40 sm:bottom-20'
+                }`}
               >
                 <Button 
                   className="rounded-full shadow-lg"
@@ -276,7 +277,7 @@ function MessageWall() {
               </motion.div>
             )}
           </AnimatePresence>
-          <div className="p-4 bg-card border-t border-border">
+          <div className="message-form-container">
             <MessageForm 
               eventId={id} 
               onMessageSent={handleNewMessage} 

@@ -104,14 +104,14 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown }) 
           </Button>
         </div>
       )}
-      <div className="flex items-center space-x-2">
+      <div className="flex flex-col sm:flex-row items-stretch space-y-2 sm:space-y-0 sm:space-x-2">
         {!user && showNameField && (
           <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Your Name (optional)"
-            className="flex-grow"
+            placeholder="Your Name"
+            className="w-full sm:w-1/4 min-w-[100px]"
           />
         )}
         <div className="flex-grow relative">
@@ -122,46 +122,49 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown }) 
             onChange={handleContentChange}
             placeholder={replyTo ? "Type your reply..." : "Type a message..."}
             required
-            className="pr-20"
+            className="pr-16"
             disabled={remainingCooldown > 0}
           />
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
             <span className="text-xs text-muted-foreground">
               {content.length}/{MAX_CHARACTERS}
             </span>
-            <Button 
-              type="button" 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8"
-              onClick={() => setShowEmojiMenu(!showEmojiMenu)}
-              aria-label="Add emoji"
-            >
-              <SmileIcon className="w-4 h-4" />
-            </Button>
-          </div>
-          {showEmojiMenu && (
-            <div className="absolute right-0 bottom-full mb-2 bg-background border border-border rounded-md shadow-lg p-2">
-              {emojis.map(emoji => (
-                <button
-                  key={emoji}
-                  type="button"
-                  className="p-1 hover:bg-muted rounded"
-                  onClick={() => addEmoji(emoji)}
-                >
-                  {emoji}
-                </button>
-              ))}
+            <div className="relative">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6"
+                onClick={() => setShowEmojiMenu(!showEmojiMenu)}
+                aria-label="Add emoji"
+              >
+                <SmileIcon className="w-4 h-4" />
+              </Button>
+              {showEmojiMenu && (
+                <div className="absolute bottom-full right-0 mb-2 bg-background border border-border rounded-md shadow-lg p-2">
+                  {emojis.map(emoji => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      className="p-1 hover:bg-muted rounded"
+                      onClick={() => addEmoji(emoji)}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
         <Button 
           type="submit" 
           variant="primary" 
           disabled={content.length === 0 || content.length > MAX_CHARACTERS || remainingCooldown > 0}
+          className="whitespace-nowrap"
         >
           <SendIcon className="h-4 w-4 mr-2" />
-          {remainingCooldown > 0 ? `Wait ${remainingCooldown.toFixed(0)}s` : 'Send'}
+          {remainingCooldown > 0 ? `${remainingCooldown.toFixed(0)}s` : 'Send'}
         </Button>
       </div>
     </form>
