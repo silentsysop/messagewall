@@ -7,7 +7,7 @@ import Message from './Message';
 import MessageForm from './MessageForm';
 import './MessageWall.css';
 import Layout from '../HUDlayout';
-import { CalendarIcon, UsersIcon, ShieldIcon, ShareIcon, ClockIcon, SettingsIcon, AlertTriangle } from 'lucide-react';
+import { CalendarIcon, UsersIcon, ShieldIcon, ShareIcon, ClockIcon, SettingsIcon, AlertTriangle, FullscreenIcon, MinimizeIcon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventSettingsModal } from '../EventSettingsModal';
@@ -28,6 +28,7 @@ function MessageWall() {
   const [lastMessageTime, setLastMessageTime] = useState(0);
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
   const navigate = useNavigate();
+  const [spectateMode, setSpectateMode] = useState(false);
 
   const scrollToBottom = (behavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
@@ -166,10 +167,14 @@ function MessageWall() {
     }
   };
 
+  const toggleSpectateMode = () => {
+    setSpectateMode(!spectateMode);
+  };
+
   return (
     <Layout>
-      <div className="flex flex-col h-full bg-background">
-        {event && (
+      <div className={`flex flex-col h-full bg-background ${spectateMode ? 'fixed inset-0 z-50' : ''}`}>
+        {!spectateMode && event && (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -197,6 +202,14 @@ function MessageWall() {
                     <SettingsIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
                   </Button>
                 )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                  onClick={toggleSpectateMode}
+                >
+                  <FullscreenIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
+                </Button>
               </div>
             </div>
             <div className="flex flex-wrap items-center text-xs sm:text-sm text-muted-foreground gap-2">
@@ -223,7 +236,7 @@ function MessageWall() {
             </div>
           </motion.div>
         )}
-        {event && event.requiresApproval && (
+        {!spectateMode && event && event.requiresApproval && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -236,7 +249,7 @@ function MessageWall() {
             </div>
           </motion.div>
         )}
-        <div className="flex-grow overflow-hidden flex flex-col bg-background rounded-lg shadow-lg border border-border">
+        <div className={`flex-grow overflow-hidden flex flex-col bg-background rounded-lg shadow-lg  ${spectateMode ? 'h-full' : 'border border-border'}`}>
           <div className="flex-grow overflow-y-auto p-4 scroll-smooth" ref={scrollContainerRef}>
             {messages.map((message, index) => (
               <motion.div
@@ -256,7 +269,7 @@ function MessageWall() {
             <div ref={messagesEndRef} />
           </div>
           <AnimatePresence>
-            {isScrolled && (
+            {isScrolled && !spectateMode && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -277,16 +290,28 @@ function MessageWall() {
               </motion.div>
             )}
           </AnimatePresence>
-          <div className="message-form-container">
-            <MessageForm 
-              eventId={id} 
-              onMessageSent={handleNewMessage} 
-              replyTo={replyTo}
-              setReplyTo={setReplyTo}
-              cooldown={getRemainingCooldown()}
-            />
-          </div>
+          {!spectateMode && (
+            <div className="message-form-container">
+              <MessageForm 
+                eventId={id} 
+                onMessageSent={handleNewMessage} 
+                replyTo={replyTo}
+                setReplyTo={setReplyTo}
+                cooldown={getRemainingCooldown()}
+              />
+            </div>
+          )}
         </div>
+        {spectateMode && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 right-8 z-50"
+            onClick={toggleSpectateMode}
+          >
+            <MinimizeIcon className="h-5 w-5" />
+          </Button>
+        )}
       </div>
       {showSettingsPopup && (
         <EventSettingsModal
