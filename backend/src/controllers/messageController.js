@@ -130,3 +130,67 @@ exports.getPendingMessages = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.reactToMessage = async (req, res) => {
+  const io = req.app.locals.io; // Access the io instance
+
+  try {
+    const { reaction } = req.body;
+    const message = await Message.findById(req.params.id);
+    
+    if (!message) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    const userId = req.user ? req.user.id : req.ip;
+    const existingReaction = message.userReactions.find(r => r.userId === userId);
+
+    if (existingReaction) {
+      if (existingReaction.reaction === reaction) {
+        // Remove reaction if clicking the same button
+        message.reactions[reaction]--;
+        message.userReactions = message.userReactions.filter(r => r.userId !== userId);
+        await message.save();
+        io.to(message.event.toString()).emit('reaction updated', { messageId: message._id, reactions: message.reactions });
+        return res.json({ reactions: message.reactions, userReaction: null });
+      } else {
+        // Change reaction
+        message.reactions[existingReaction.reaction]--;
+        message.reactions[reaction]++;
+        existingReaction.reaction = reaction;
+      }
+    } else {
+      // Add new reaction
+      message.reactions[reaction]++;
+      message.userReactions.push({ userId, reaction });
+    }
+
+    await message.save();
+
+    // Emit the reaction update event
+    io.to(message.event.toString()).emit('reaction updated', { messageId: message._id, reactions: message.reactions });
+
+    res.json({ reactions: message.reactions, userReaction: reaction });
+  } catch (error) {
+    console.error('Error reacting to message:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Add this new method to get user's reaction
+exports.getUserReaction = async (req, res) => {
+  try {
+    const message = await Message.findById(req.params.id);
+    if (!message) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    const userId = req.user ? req.user.id : req.ip;
+    const userReaction = message.userReactions.find(r => r.userId === userId);
+
+    res.json({ reaction: userReaction ? userReaction.reaction : null });
+  } catch (error) {
+    console.error('Error getting user reaction:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

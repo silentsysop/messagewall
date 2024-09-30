@@ -47,12 +47,20 @@ function MessageWall() {
       }
     });
 
+    // Listen for reaction updates
+    socket.on('reaction updated', ({ messageId, reactions }) => {
+      setMessages(prevMessages => prevMessages.map(msg => 
+        msg._id === messageId ? { ...msg, reactions } : msg
+      ));
+    });
+  
     socket.on('user count', (count) => {
       setActiveUsers(count);
     });
   
     return () => {
       socket.off('new message');
+      socket.off('reaction updated'); // Remove the reaction updated listener
       socket.off('user count');
       socket.emit('leave event', id);
     };

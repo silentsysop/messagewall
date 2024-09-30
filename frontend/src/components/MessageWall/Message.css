@@ -21,6 +21,7 @@
     transform-style: preserve-3d;
     transition: transform 0.3s ease;
     border-radius: 18px;
+    padding: 10px 15px 5px 15px; /* Adjusted padding */
 }
 
 .message-bubble:hover {
@@ -213,4 +214,79 @@
     .spectate-mode .message-content {
         font-size: 1.8em;
     }
+}
+
+.message-reactions {
+    display: flex;
+    justify-content: flex-start; /* Changed from flex-end to flex-start */
+    margin-top: 5px; /* Reduced top margin */
+    margin-left: -5px; /* Negative margin to align with message start */
+}
+
+.reaction-button {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-right: 8px; /* Changed from margin-left to margin-right */
+    border-radius: 16px;
+    transition: all 0.2s ease;
+    color: var(--muted-foreground);
+}
+
+.reaction-button:hover {
+    background-color: var(--accent-hover);
+    color: var(--accent-foreground);
+}
+
+.reaction-button.active {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+    /* Additional styles for highlighting */
+    box-shadow: 0 0 5px var(--accent);
+}
+
+.reaction-button span {
+    margin-left: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.reaction-button svg {
+    transition: transform 0.2s ease;
+}
+
+.reaction-button:hover svg,
+.reaction-button.active svg {
+    transform: scale(1.1);
+}
+
+.reaction-button.active {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+    /* Add any additional styles for highlighting */
+}
+
+.reaction-button.active svg {
+    transform: scale(1.2);
+}
+
+.reaction-button:hover:not(.active) {
+    background-color: var(--accent-hover);
+    color: var(--accent-foreground);
+}
+
+/* Highlight the active reaction button */
+.reaction-button.active {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+    /* Additional styles for highlighting */
+    box-shadow: 0 0 5px var(--accent);
+}
+
+/* Optionally, add a transition for smooth highlighting */
+.reaction-button {
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }

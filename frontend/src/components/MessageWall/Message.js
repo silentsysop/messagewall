@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Message.css';
-import { Trash2, ReplyIcon } from 'lucide-react'; // Import the reply icon
+import { Trash2, ReplyIcon, ThumbsUp, ThumbsDown } from 'lucide-react'; // Import the reply icon
+import api from '../../services/api';
+import { toast } from 'react-hot-toast'; // Import toast
 
 function Message({ message, canDelete, onDelete, onReply }) {
   const [showMenu, setShowMenu] = useState(false);
   const [animate, setAnimate] = useState(false);
+  const [userReaction, setUserReaction] = useState(message.userReaction); // Track user's reaction locally
+  const [reactions, setReactions] = useState(message.reactions); // Track reactions locally for optimistic UI
+  const [isProcessing, setIsProcessing] = useState(false); // Track if a reaction is being processed
   const menuRef = useRef(null);
   const bubbleRef = useRef(null);
   const isAdmin = message.user && message.user.role === 'organizer';
@@ -29,6 +34,12 @@ function Message({ message, canDelete, onDelete, onReply }) {
       createBubbles(bubbleRef.current);
     }
   }, [animate]);
+
+  useEffect(() => {
+    // Update local state when message prop changes (e.g., from Socket.io)
+    setUserReaction(message.userReaction);
+    setReactions(message.reactions);
+  }, [message.userReaction, message.reactions]);
 
   const handleContextMenu = (e) => {
     e.preventDefault();
@@ -56,6 +67,57 @@ function Message({ message, canDelete, onDelete, onReply }) {
       return message.user.username;
     }
     return message.name || 'Anonymous';
+  };
+
+  const handleReact = async (reaction) => {
+    if (isProcessing) return; // Prevent multiple clicks
+
+    setIsProcessing(true); // Immediately set isProcessing to true
+
+    // Determine the new reaction state
+    let newReaction = reaction;
+    let previousReaction = userReaction;
+
+    // Optimistically update the UI
+    if (userReaction === reaction) {
+      // User is removing their reaction
+      newReaction = null;
+      setUserReaction(null);
+      setReactions(prev => ({
+        ...prev,
+        [reaction]: prev[reaction] - 1 < 0 ? 0 : prev[reaction] - 1 // Ensure count doesn't go negative
+      }));
+    } else {
+      // User is adding/changing their reaction
+      setUserReaction(reaction);
+      setReactions(prev => ({
+        ...prev,
+        [reaction]: prev[reaction] + 1,
+        ...(previousReaction && { [previousReaction]: prev[previousReaction] - 1 < 0 ? 0 : prev[previousReaction] - 1 })
+      }));
+    }
+
+    try {
+      const response = await api.post(`/messages/${message._id}/react`, { reaction });
+
+      // Optionally, you can verify the response and update local state if needed
+      // But since Socket.io will handle updates, no further action is required
+    } catch (error) {
+      console.error('Error reacting to message:', error);
+      // Rollback the optimistic update
+      setUserReaction(previousReaction);
+      setReactions(prev => ({
+        ...prev,
+        [reaction]: newReaction ? prev[reaction] - 1 < 0 ? 0 : prev[reaction] - 1 : prev[reaction],
+        ...(previousReaction && { [previousReaction]: prev[previousReaction] + 1 })
+      }));
+      
+      // Display specific error message if available
+      const errorMessage = error.response?.data?.error || 'Failed to update reaction. Please try again.';
+      toast.error(errorMessage);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -101,7 +163,32 @@ function Message({ message, canDelete, onDelete, onReply }) {
           </div>
         </div>
         <span className="message-content">{message.content}</span>
+        <div className="message-reactions">
+          <button 
+            onClick={() => handleReact('thumbsUp')} 
+            className={`reaction-button ${userReaction === 'thumbsUp' ? 'active' : ''}`}
+            disabled={isProcessing}
+            aria-label="Thumbs Up"
+          >
+            <ThumbsUp size={16} />
+            <span>{reactions.thumbsUp}</span>
+          </button>
+          <button 
+            onClick={() => handleReact('thumbDown')} 
+            className={`reaction-button ${userReaction === 'thumbDown' ? 'active' : ''}`}
+            disabled={isProcessing}
+            aria-label="Thumbs Down"
+          >
+            <ThumbsDown size={16} />
+            <span>{reactions.thumbDown}</span>
+          </button>
+        </div>
       </div>
+      {canDelete && showMenu && (
+        <div className="context-menu show" ref={menuRef}>
+          <button onClick={onDelete}>Delete</button>
+        </div>
+      )}
     </div>
   );
 }
