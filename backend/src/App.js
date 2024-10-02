@@ -10,12 +10,13 @@ const messageRoutes = require('./routes/messageRoutes');
 const path = require('path');
 const userRoutes = require('./routes/userRoutes');
 const pollRoutes = require('./routes/pollRoutes');
+const config = require('./config/config');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: config.frontendUrl,
     methods: ["GET", "POST"]
   }
 });
