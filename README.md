@@ -22,6 +22,11 @@ MessageWall is a real-time event messaging platform that allows event organizers
 - 🔔 Real-time user count for active events
 - 📊 Event duration display
 - 🔗 Easy event sharing functionality
+- 🌓 Dark/Light mode support
+- 📊 Real-time polls for events
+- 👀 Spectator mode for fullscreen message viewing
+- 👍 Message reactions (thumbs up/down)
+- 🔄 Automatic removal of ended events
 
 ## 🚀 Coming Soon
 - 🔔 Push notification system
@@ -62,11 +67,11 @@ To give yourself organizer/admin privileges:
 3.   Find your created account and change the role field to "organizer"
 
 
-### Installation
+### Installation (development)
 
 1. Clone the repository
    ```
-   git clone https://github.com/yourusername/messagewall.git
+   git clone https://github.com/silentsysop/messagewall.git
    cd messagewall
    ```
 
@@ -93,6 +98,75 @@ To give yourself organizer/admin privileges:
    ```
 
 6. Open your browser and navigate to `http://localhost:3000`
+
+### Installation (production)
+Repeat same steps 1-3 from development installation then:
+
+4. Configure the backend:
+Modify the `config.js` file in the frontend/src directory if you want to release to production:
+   ```
+   const config = {
+     development: {
+       backendUrl: 'http://localhost:5000/api',
+       socketUrl: 'http://localhost:5000',
+     },
+     production: {
+       backendUrl: 'https://your-production-backend-url.com/api',
+       socketUrl: 'https://your-production-backend-url.com',
+     }
+   };
+   
+   const env = 'development'; // Change to 'production' for production build
+   
+   export default config[env];
+   ```
+
+5. Configure the frontend:
+Modify the `config.js` file in the backend/src/config directory if you want to release to production:
+   ```
+   const config = {
+     development: {
+       frontendUrl: 'http://localhost:3000',
+     },
+     production: {
+       frontendUrl: 'https://your-production-frontend-url.com',
+     }
+   };
+   
+   const env = 'development'; // Change to 'production' for production build
+   
+   module.exports = config[env];
+   ``` 
+
+6. Build the frontend:
+   ```
+   cd ../frontend && npm run build
+   ```
+
+#### Option 1: Using serve with PM2 (Simpler for Low to Medium Traffic Setup)
+7. Install serve and PM2 globally:
+   ```
+   npm install -g serve pm2
+   ```
+
+8. Start the backend with PM2:
+   ```
+   cd ../backend
+   pm2 start src/App.js --name "messagewall-backend"
+   ```
+
+9. Start the frontend with PM2 (port = 3000):
+   ```
+   cd ../frontend
+   pm2 serve build 3000 --name "messagewall-frontend"
+   ```
+
+10. Check status and set up PM2 to start on system reboot:
+   ```
+   pm2 list
+   pm2 startup
+   pm2 save
+   ```
 
 ## 📄 License
 
