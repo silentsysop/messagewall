@@ -7,11 +7,14 @@ import Message from './Message';
 import MessageForm from './MessageForm';
 import './MessageWall.css';
 import Layout from '../HUDlayout';
-import { CalendarIcon, UsersIcon, ShieldIcon, ShareIcon, ClockIcon, SettingsIcon, AlertTriangle, FullscreenIcon, MinimizeIcon } from 'lucide-react';
+import { CalendarIcon, UsersIcon, ShieldIcon, ShareIcon, ClockIcon, SettingsIcon, AlertTriangle, FullscreenIcon, MinimizeIcon, BarChart2Icon } from 'lucide-react';
 import { Button } from '../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventSettingsModal } from '../EventSettingsModal';
 import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
+import { PollCreationModal } from '../PollCreationModal';
+import { PollDisplay } from '../PollDisplay';
+import { showErrorToast } from '../../utils/toast';
 
 function MessageWall() {
   const [messages, setMessages] = useState([]);
@@ -29,6 +32,10 @@ function MessageWall() {
   const [showSettingsPopup, setShowSettingsPopup] = useState(false);
   const navigate = useNavigate();
   const [spectateMode, setSpectateMode] = useState(false);
+  const [showPollModal, setShowPollModal] = useState(false);
+  const [activePoll, setActivePoll] = useState(null);
+
+  const canPerformAdminActions = user && user.role === 'organizer';
 
   const scrollToBottom = (behavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
@@ -47,7 +54,6 @@ function MessageWall() {
       }
     });
 
-    // Listen for reaction updates
     socket.on('reaction updated', ({ messageId, reactions }) => {
       setMessages(prevMessages => prevMessages.map(msg => 
         msg._id === messageId ? { ...msg, reactions } : msg
@@ -58,10 +64,30 @@ function MessageWall() {
       setActiveUsers(count);
     });
   
+    socket.on('new poll', (poll) => {
+      setActivePoll(poll);
+    });
+  
+    socket.on('poll update', (updatedPoll) => {
+      setActivePoll(updatedPoll);
+    });
+  
+    socket.on('poll ended', (endedPoll) => {
+      setActivePoll(prev => prev && prev._id === endedPoll._id ? endedPoll : prev);
+    });
+  
+    socket.on('poll deleted', (deletedPollId) => {
+      setActivePoll(prev => prev && prev._id === deletedPollId ? null : prev);
+    });
+  
     return () => {
       socket.off('new message');
-      socket.off('reaction updated'); // Remove the reaction updated listener
+      socket.off('reaction updated');
       socket.off('user count');
+      socket.off('new poll');
+      socket.off('poll update');
+      socket.off('poll ended');
+      socket.off('poll deleted');
       socket.emit('leave event', id);
     };
   }, [id, isScrolled]);
@@ -84,11 +110,26 @@ function MessageWall() {
     return () => scrollContainer?.removeEventListener('scroll', handleScroll);
   }, []);
 
+
+  useEffect(() => {
+    const fetchActivePoll = async () => {
+      try {
+        const response = await api.get(`/polls/${id}`);
+        setActivePoll(response.data.activePoll);
+      } catch (error) {
+        console.error('Error fetching active poll:', error);
+        // Don't set any state or show any error to the user
+      }
+    };
+
+    fetchActivePoll();
+  }, [id]);
+
   const fetchEvent = async () => {
     try {
       const response = await api.get(`/events/${id}`);
       setEvent(response.data);
-      setCooldown(response.data.cooldownEnabled ? response.data.cooldown : 0);
+      console.log('Fetched event:', response.data);
     } catch (error) {
       console.error('Error fetching event:', error);
     }
@@ -145,6 +186,7 @@ function MessageWall() {
     return Math.max(0, cooldown - elapsed);
   };
 
+
   const handleReply = (message, focusInput) => {
     setReplyTo(message);
     scrollToBottom();
@@ -179,6 +221,30 @@ function MessageWall() {
     setSpectateMode(!spectateMode);
   };
 
+  const handleVote = async (pollId, optionIndex) => {
+    try {
+      const response = await api.post(`/polls/${pollId}/vote`, { optionIndex });
+      setActivePoll(response.data);  // Update the poll state instead of setting it to null
+    } catch (error) {
+      console.error('Error voting on poll:', error);
+      showErrorToast('Failed to submit vote');
+    }
+  };
+
+  const handlePollEnd = async (pollId) => {
+    try {
+      const response = await api.put(`/polls/${pollId}/end`);
+      setActivePoll(response.data);  // Update the poll state with the ended poll data
+    } catch (error) {
+      console.error('Error ending poll:', error);
+      showErrorToast('Failed to end poll');
+    }
+  };
+
+  const handleRemovePoll = (pollId) => {
+    setActivePoll(null);
+  };
+
   return (
     <Layout>
       <div className={`flex flex-col h-full bg-background ${spectateMode ? 'fixed inset-0 z-50 spectate-mode' : ''}`}>
@@ -187,7 +253,7 @@ function MessageWall() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-card shadow-md p-2 sm:p-4 mb-2 sm:mb-4 rounded-lg"
+            className="bg-card shadow-md p-2 sm:p-4 mb-2 sm:mb-3 rounded-lg"
           >
             <div className="flex justify-between items-center mb-2">
               <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate mr-2">{event.name}</h1>
@@ -218,6 +284,16 @@ function MessageWall() {
                 >
                   <FullscreenIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
                 </Button>
+                {canPerformAdminActions && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                    onClick={() => setShowPollModal(true)}
+                  >
+                    <BarChart2Icon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
+                  </Button>
+                )}
               </div>
             </div>
             <div className="flex flex-wrap items-center text-xs sm:text-sm text-muted-foreground gap-2">
@@ -258,23 +334,36 @@ function MessageWall() {
           </motion.div>
         )}
         <div className={`flex-grow overflow-hidden flex flex-col bg-background rounded-lg shadow-lg ${spectateMode ? 'h-full' : 'border border-border'}`}>
-          <div className="flex-grow overflow-y-auto p-4 scroll-smooth" ref={scrollContainerRef}>
-            {messages.map((message, index) => (
-              <motion.div
-                key={message._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-              >
-                <Message 
-                  message={message}
-                  canDelete={user && (user.role === 'organizer' || user._id === message.user._id)}
-                  onDelete={() => deleteMessage(message._id)}
-                  onReply={handleReply}
+          <div className="flex-grow overflow-y-auto scroll-smooth" ref={scrollContainerRef}>
+            {activePoll && (
+              <div className="sticky top-0 z-10">
+                <PollDisplay
+                  poll={activePoll}
+                  onVote={handleVote}
+                  isOrganizer={canPerformAdminActions}
                 />
-              </motion.div>
-            ))}
-            <div ref={messagesEndRef} />
+              </div>
+            )}
+            <div className="px-4">
+              {messages.map((message, index) => (
+                <motion.div
+                  key={message._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                >
+                  <Message 
+                    message={message}
+                    canDelete={canPerformAdminActions || (user && user._id === message.user._id)}
+                    onDelete={() => deleteMessage(message._id)}
+                    onReply={handleReply}
+                    event={event}
+                    isAdmin={user && user.role === 'organizer'}
+                  />
+                </motion.div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
           <AnimatePresence>
             {isScrolled && !spectateMode && (
@@ -306,6 +395,7 @@ function MessageWall() {
                 replyTo={replyTo}
                 setReplyTo={setReplyTo}
                 cooldown={getRemainingCooldown()}
+                isAdmin={canPerformAdminActions}
               />
             </div>
           )}
@@ -329,8 +419,15 @@ function MessageWall() {
           onDelete={handleEventDelete}
         />
       )}
+      <PollCreationModal
+        isOpen={showPollModal}
+        onClose={() => setShowPollModal(false)}
+        eventId={id}
+        isOrganizer={canPerformAdminActions}
+      />
     </Layout>
   );
 }
+
 
 export default MessageWall;

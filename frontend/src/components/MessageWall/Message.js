@@ -4,7 +4,7 @@ import { Trash2, ReplyIcon, ThumbsUp, ThumbsDown } from 'lucide-react'; // Impor
 import api from '../../services/api';
 import { toast } from 'react-hot-toast'; // Import toast
 
-function Message({ message, canDelete, onDelete, onReply }) {
+function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
   const [showMenu, setShowMenu] = useState(false);
   const [animate, setAnimate] = useState(false);
   const [userReaction, setUserReaction] = useState(message.userReaction); // Track user's reaction locally
@@ -12,7 +12,15 @@ function Message({ message, canDelete, onDelete, onReply }) {
   const [isProcessing, setIsProcessing] = useState(false); // Track if a reaction is being processed
   const menuRef = useRef(null);
   const bubbleRef = useRef(null);
-  const isAdmin = message.user && message.user.role === 'organizer';
+
+  console.log('Message user:', message.user);
+  console.log('Event:', event);
+
+  const isEventCreator = message.user && event && event.organizer && message.user._id === event.organizer._id;
+  const isOrganizer = message.user && message.user.role === 'organizer';
+
+  console.log('Is Event Creator:', isEventCreator);
+  console.log('Is Organizer:', isOrganizer);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -134,8 +142,9 @@ function Message({ message, canDelete, onDelete, onReply }) {
         )}
         <div className="message-header">
           <div className="message-info">
-            <span className={`message-author ${isAdmin ? 'admin' : ''}`}>
-              {isAdmin && <span className="admin-badge">Admin</span>}
+            <span className={`message-author ${isEventCreator ? 'event-creator' : isAdmin ? 'admin' : ''}`}>
+              {isEventCreator && <span className="badge event-creator-badge">Organizer</span>}
+              {!isEventCreator && isOrganizer && <span className="badge organizer-badge">Admin</span>}
               {getDisplayName()}
             </span>
             <span className="message-time">

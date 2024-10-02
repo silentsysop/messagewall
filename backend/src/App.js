@@ -9,6 +9,7 @@ const eventRoutes = require('./routes/eventRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const path = require('path');
 const userRoutes = require('./routes/userRoutes');
+const pollRoutes = require('./routes/pollRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -32,6 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/polls', pollRoutes);
 
 // Serve static files in uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -79,6 +81,18 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('Client disconnected');
+  });
+
+  socket.on('new poll', (poll) => {
+    io.to(poll.event.toString()).emit('new poll', poll);
+  });
+
+  socket.on('poll update', (poll) => {
+    io.to(poll.event.toString()).emit('poll update', poll);
+  });
+
+  socket.on('poll ended', (poll) => {
+    io.to(poll.event.toString()).emit('poll ended', poll);
   });
 });
 

@@ -66,7 +66,8 @@ exports.updateEvent = async (req, res) => {
       return res.status(404).json({ msg: 'Event not found' });
     }
     
-    if (event.organizer.toString() !== req.user.id) {
+    // Change this condition
+    if (req.user.role !== 'organizer') {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 
@@ -109,7 +110,8 @@ exports.deleteEvent = async (req, res) => {
       return res.status(404).json({ msg: 'Event not found' });
     }
 
-    if (event.organizer.toString() !== req.user.id) {
+    // Change this condition
+    if (req.user.role !== 'organizer') {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 
