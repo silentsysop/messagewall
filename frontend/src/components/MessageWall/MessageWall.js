@@ -34,6 +34,7 @@ function MessageWall() {
   const [spectateMode, setSpectateMode] = useState(false);
   const [showPollModal, setShowPollModal] = useState(false);
   const [activePoll, setActivePoll] = useState(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const canPerformAdminActions = user && user.role === 'organizer';
 
@@ -101,15 +102,30 @@ function MessageWall() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-      setIsScrolled(scrollTop + clientHeight < scrollHeight - 10);
+      if (scrollContainerRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+        const isBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
+        setIsAtBottom(isBottom);
+      }
     };
 
     const scrollContainer = scrollContainerRef.current;
-    scrollContainer?.addEventListener('scroll', handleScroll);
-    return () => scrollContainer?.removeEventListener('scroll', handleScroll);
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      }
+    };
   }, []);
 
+  useEffect(() => {
+    if (isAtBottom) {
+      scrollToBottom();
+    }
+  }, [messages, isAtBottom]);
 
   useEffect(() => {
     const fetchActivePoll = async () => {
