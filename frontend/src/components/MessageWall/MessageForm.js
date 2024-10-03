@@ -122,7 +122,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown }) 
             onChange={handleContentChange}
             placeholder={replyTo ? "Type your reply..." : "Type a message..."}
             required
-            className="pr-16"
+            className="pr-20" // Increase right padding to make room for character count
             disabled={remainingCooldown > 0}
           />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">

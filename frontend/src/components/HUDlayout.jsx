@@ -34,8 +34,8 @@ export default function Layout({ children }) {
     <div className="flex h-screen w-full flex-col bg-background text-foreground">
       <header className="flex h-16 shrink-0 items-center justify-between border-b border-muted px-4 md:px-6">
         <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-          <MessageCircleIcon className="h-6 w-6" style={{ color: '#93C01F' }} />
-          <span className="hidden md:inline">EventChat</span>
+          <img src="/vakslogo_kuvake.png" alt="VAKS Logo" className="h-6 w-6" />
+          <span className="hidden md:inline">VAKS-Viestiseinä</span>
         </Link>
         
         <nav className="flex items-center gap-4">

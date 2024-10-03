@@ -9,6 +9,23 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      backgroundImage: {
+        'puukuvio': "url('/public/puukuvio_vaks.svg')",
+      },
+      backgroundPosition: {
+        'left-center': 'left center',
+        'left-peek-sm': 'left -100px center',
+        'left-peek-md': 'left -200px center',
+        'left-peek-lg': 'left -300px center',
+        'left-peek-xl': 'left -400px center',
+      },
+      backgroundSize: {
+        'auto-full': 'auto 100%',
+        'peek-sm': '300px 100%',
+        'peek-md': '400px 100%',
+        'peek-lg': '500px 100%',
+        'peek-xl': '600px 100%',
+      },
       fontFamily: {
         heading: ['var(--font-heading)', ...fontFamily.sans],
         body: ['var(--font-body)', ...fontFamily.mono]
@@ -67,6 +84,13 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out"
+      },
+      // Add this new class
+      backgroundSize: {
+        'full': '100% 100%',
+      },
+      scale: {
+        '80': '0.8',
       },
     },
   },

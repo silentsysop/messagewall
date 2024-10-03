@@ -13,19 +13,48 @@
 }
 
 .message-bubble {
-    @apply bg-card rounded-lg p-3 relative max-w-[80%] overflow-hidden;
+    @apply rounded-lg p-3 relative overflow-hidden;
+    max-width: 64%;
+    background-color: rgba(var(--card), 0.7); /* Semi-transparent background */
+    backdrop-filter: blur(10px); /* Adds a blur effect to the background */
     box-shadow: 
         0 4px 6px rgba(0,0,0,0.1),
         0 1px 3px rgba(0,0,0,0.08),
         inset 0 2px 2px rgba(255,255,255,0.1);
     transform-style: preserve-3d;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     border-radius: 18px;
-    padding: 10px 15px 5px 15px; /* Adjusted padding */
+    padding: 8px 12px 4px 12px;
+    font-size: 0.9em;
+    border: 1px solid rgba(var(--accent-rgb), 0.3); /* Subtle border */
 }
 
 .message-bubble:hover {
     transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+        0 6px 8px rgba(0,0,0,0.15),
+        0 2px 4px rgba(0,0,0,0.12),
+        inset 0 2px 2px rgba(255,255,255,0.1),
+        0 0 0 2px rgba(var(--accent-rgb), 0.5); /* Glow effect on hover */
+}
+
+/* Add this new rule for the glow effect */
+.message-bubble::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, rgba(var(--accent-rgb), 0.3), rgba(var(--accent-rgb), 0.1));
+    border-radius: 20px; /* Slightly larger than the bubble */
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.message-bubble:hover::after {
+    opacity: 1;
 }
 
 .message-bubble::before {
@@ -57,7 +86,7 @@
 }
 
 .message-content {
-    @apply block break-words text-foreground mt-1.5 text-[1.05em] leading-relaxed;
+    @apply block break-words text-foreground mt-1 text-[0.95em] leading-relaxed;
 }
 
 .context-menu {
@@ -130,7 +159,7 @@
 .message::after {
     content: '';
     @apply absolute -top-[10px] -left-[10px] -right-[10px] -bottom-[10px] pointer-events-none -z-10;
-    background: radial-gradient(ellipse at center, rgba(145,71,255,0.15) 0%, rgba(145,71,255,0) 70%);
+    background: radial-gradient(ellipse at center, hsl(var(--accent) / 0.15) 0%, hsl(var(--accent) / 0) 70%);
     filter: blur(10px);
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -181,38 +210,55 @@
 
 /* Add this new section at the end of the file */
 .spectate-mode .message {
-    font-size: 1.2em;
+    font-size: 1em;
 }
 
 .spectate-mode .message-bubble {
-    max-width: 90%;
+    max-width: 85%; /* Increased from 68% */
 }
 
 .spectate-mode .message-content {
-    font-size: 1.2em;
+    font-size: 1em;
+}
+
+@media (max-width: 640px) {
+    .message-bubble {
+        max-width: 85%;
+        font-size: 0.95em;
+    }
+
+    .message-content {
+        font-size: 1em;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+    .message-bubble {
+        max-width: 75%;
+    }
 }
 
 @media (min-width: 1024px) {
     .spectate-mode .message {
-        font-size: 1.5em;
+        font-size: 1.2em;
     }
 
     .spectate-mode .message-bubble {
-        max-width: 95%;
+        max-width: 80%; /* Increased from 72% */
     }
 
     .spectate-mode .message-content {
-        font-size: 1.5em;
+        font-size: 1.08em;
     }
 }
 
 @media (min-width: 1440px) {
     .spectate-mode .message {
-        font-size: 1.8em;
+        font-size: 1.26em;
     }
 
     .spectate-mode .message-content {
-        font-size: 1.8em;
+        font-size: 1.26em;
     }
 }
 

@@ -15,6 +15,8 @@ import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
 import { PollCreationModal } from '../PollCreationModal';
 import { PollDisplay } from '../PollDisplay';
 import { showErrorToast } from '../../utils/toast';
+import { useTheme } from '../../context/ThemeContext';
+
 
 function MessageWall() {
   const [messages, setMessages] = useState([]);
@@ -38,9 +40,12 @@ function MessageWall() {
 
   const canPerformAdminActions = user && user.role === 'organizer';
 
+  const { theme } = useTheme();
+
   const scrollToBottom = (behavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
   };
+
 
   useEffect(() => {
     fetchEvent();
@@ -54,6 +59,7 @@ function MessageWall() {
         scrollToBottom();
       }
     });
+
 
     socket.on('reaction updated', ({ messageId, reactions }) => {
       setMessages(prevMessages => prevMessages.map(msg => 
@@ -109,6 +115,7 @@ function MessageWall() {
       }
     };
 
+
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
       scrollContainer.addEventListener('scroll', handleScroll);
@@ -159,6 +166,7 @@ function MessageWall() {
       console.error('Error fetching messages:', error);
     }
   };
+
 
   const deleteMessage = async (messageId) => {
     try {
@@ -233,6 +241,7 @@ function MessageWall() {
     }
   };
 
+
   const toggleSpectateMode = () => {
     setSpectateMode(!spectateMode);
   };
@@ -269,7 +278,7 @@ function MessageWall() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-card shadow-md p-2 sm:p-4 mb-2 sm:mb-3 rounded-lg"
+            className="bg-card border-b shadow-md p-2 sm:p-4 rounded-lg"
           >
             <div className="flex justify-between items-center mb-2">
               <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate mr-2">{event.name}</h1>
@@ -349,7 +358,7 @@ function MessageWall() {
             </div>
           </motion.div>
         )}
-        <div className={`flex-grow overflow-hidden flex flex-col bg-background rounded-lg shadow-lg ${spectateMode ? 'h-full' : 'border border-border'}`}>
+        <div className={`flex-grow overflow-hidden flex flex-col bg-background bg-puukuvio bg-no-repeat bg-left-peek-lg bg-peek-lg ${theme === 'light' ? 'bg-blend-multiply bg-opacity-[0.15]' : 'bg-blend-soft-light bg-opacity-[0.1]'} rounded-lg shadow-lg ${spectateMode ? 'h-full' : ''}`}>
           <div className="flex-grow overflow-y-auto scroll-smooth" ref={scrollContainerRef}>
             {activePoll && (
               <div className="sticky top-0 z-10">
@@ -404,7 +413,7 @@ function MessageWall() {
             )}
           </AnimatePresence>
           {!spectateMode && (
-            <div className="p-4 bg-background border-t border-border">
+            <div className="p-4 bg-card border-t border-border">
               <MessageForm 
                 eventId={id} 
                 onMessageSent={handleNewMessage} 
@@ -444,6 +453,7 @@ function MessageWall() {
     </Layout>
   );
 }
+
 
 
 export default MessageWall;
