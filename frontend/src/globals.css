@@ -63,8 +63,8 @@
 }
 
 :root {
-  --font-heading: 'Bricolage Grotesque', sans-serif;
-  --font-body: 'Space Mono', monospace;
+  --font-heading: 'Ubuntu', sans-serif;
+  --font-body: 'Montserrat', sans-serif;
 }
 
 body {

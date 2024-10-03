@@ -34,13 +34,13 @@ export default function Layout({ children }) {
     <div className="flex h-screen w-full flex-col bg-background text-foreground">
       <header className="flex h-16 shrink-0 items-center justify-between border-b border-muted px-4 md:px-6">
         <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-          <MessageCircleIcon className="h-6 w-6 text-primary" />
+          <MessageCircleIcon className="h-6 w-6" style={{ color: '#93C01F' }} />
           <span className="hidden md:inline">EventChat</span>
         </Link>
         
         <nav className="flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
-            <CalendarIcon className="h-5 w-5" />
+            <CalendarIcon className="h-5 w-5"  />
             <span className="hidden md:inline">Events</span>
           </Link>
           
@@ -98,7 +98,7 @@ export default function Layout({ children }) {
       <div className="flex flex-1 overflow-hidden">
         <nav className="hidden h-full w-64 flex-col border-r border-muted bg-muted-foreground/5 px-4 py-6 md:flex">
           <div className="mb-6 flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-primary" />
+            <CalendarIcon className="h-5 w-5" style={{ color: '#93C01F' }}/>
             <h2 className="text-lg font-semibold">Events</h2>
           </div>
           <div className="flex-1 overflow-auto">

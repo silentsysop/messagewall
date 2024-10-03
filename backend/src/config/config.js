@@ -10,6 +10,6 @@ const config = {
     }
   };
   
-  const env = 'development';
+  const env = 'development'; // 'development' or 'production'
   
   module.exports = config[env];

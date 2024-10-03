@@ -185,7 +185,7 @@ export default function MainPage() {
           <div className={`flex flex-col ${viewMode === 'list' ? 'flex-1' : ''}`}>
             <h3 className="text-lg font-semibold">{event.name}</h3>
             <div className="mt-1 space-y-1">
-              <p className="text-sm font-medium text-green-600">{getEventStatus()}</p>
+              <p className="text-sm font-medium" style={{ color: '#93C01F' }}>{getEventStatus()}</p>
               <p className="text-sm text-muted-foreground">
                 {formatEventTime(startDate)} - {format(endDate, 'MMM d, yyyy h:mm a')}
               </p>
