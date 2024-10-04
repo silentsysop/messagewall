@@ -3,7 +3,7 @@ const Event = require('../models/Event');
 
 exports.createPoll = async (req, res) => {
   try {
-    const { question, options, duration } = req.body;
+    const { question, options, duration, type } = req.body;
     const eventId = req.params.eventId;
 
     const event = await Event.findById(eventId);
@@ -17,10 +17,29 @@ exports.createPoll = async (req, res) => {
 
     const endTime = new Date(Date.now() + duration * 1000);
 
+    let pollOptions;
+    switch (type) {
+      case 'yes-no':
+        pollOptions = [{ text: 'Yes' }, { text: 'No' }];
+        break;
+      case 'rating':
+        pollOptions = [
+          { text: '1' },
+          { text: '2' },
+          { text: '3' },
+          { text: '4' },
+          { text: '5' }
+        ];
+        break;
+      default:
+        pollOptions = options.map(option => ({ text: option }));
+    }
+
     const newPoll = new Poll({
       event: eventId,
+      type,
       question,
-      options: options.map(option => ({ text: option })),
+      options: pollOptions,
       createdBy: req.user.id,
       duration,
       endTime
@@ -52,24 +71,16 @@ const endPoll = async (pollId, io) => {
     // Emit socket event to notify clients that the poll has ended
     io.to(poll.event.toString()).emit('poll ended', poll);
 
-    // Schedule poll deletion after 10 seconds
-    setTimeout(() => deletePoll(pollId, io), 10000);
+    // Schedule poll removal from client after 10 seconds
+    setTimeout(() => {
+      io.to(poll.event.toString()).emit('poll removed', pollId);
+    }, 10000);
   } catch (error) {
     console.error('Error ending poll:', error);
   }
 };
 
-const deletePoll = async (pollId, io) => {
-  try {
-    const poll = await Poll.findByIdAndDelete(pollId);
-    if (!poll) return;
-
-    // Emit socket event to notify clients that the poll has been deleted
-    io.to(poll.event.toString()).emit('poll deleted', pollId);
-  } catch (error) {
-    console.error('Error deleting poll:', error);
-  }
-};
+// Remove the deletePoll function
 
 exports.getActivePoll = async (req, res) => {
   try {
@@ -144,8 +155,10 @@ exports.endPoll = async (req, res) => {
     // Emit socket event to notify clients that the poll has ended
     req.app.locals.io.to(poll.event.toString()).emit('poll ended', poll);
 
-    // Schedule poll deletion after 10 seconds
-    setTimeout(() => deletePoll(pollId, req.app.locals.io), 10000);
+    // Schedule poll removal from client after 10 seconds
+    setTimeout(() => {
+      req.app.locals.io.to(poll.event.toString()).emit('poll removed', poll._id);
+    }, 10000);
 
     res.json(poll);
   } catch (error) {
@@ -172,6 +185,20 @@ exports.getUserVote = async (req, res) => {
     }
   } catch (error) {
     console.error('Error getting user vote:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.getPollHistory = async (req, res) => {
+  try {
+    const eventId = req.params.eventId;
+    const polls = await Poll.find({ event: eventId })
+      .sort({ createdAt: -1 })
+      .populate('createdBy', 'username');
+
+    res.json(polls);
+  } catch (error) {
+    console.error('Error fetching poll history:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };

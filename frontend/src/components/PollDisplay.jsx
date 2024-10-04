@@ -102,7 +102,7 @@ export function PollDisplay({ poll, onVote, isOrganizer }) {
     setIsExpanded(!isExpanded);
   };
 
-  const isPollEnded = timeLeftMs <= 0 || !poll.isActive;
+  const isPollEnded = !poll.isActive;
 
   return (
     <motion.div
@@ -196,7 +196,7 @@ export function PollDisplay({ poll, onVote, isOrganizer }) {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">{totalVotes.toLocaleString()} votes</span>
                 <div className="flex items-center">
-                  {!isPollEnded && (
+                  {!isPollEnded ? (
                     <button
                     className={`bg-gradient-to-r from-[#9147ff] to-[#0891b2] px-4 py-2 rounded-full text-sm font-semibold ${
                       hasVoted || selectedOption === null ? 'opacity-50 cursor-not-allowed' : 'hover:from-[#a970ff] hover:to-[#0aa2c0]'
@@ -206,10 +206,9 @@ export function PollDisplay({ poll, onVote, isOrganizer }) {
                     >
                       {hasVoted ? 'Voted' : 'Vote'}
                     </button>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Poll Ended</div>
                   )}
-                  <div className="ml-2 bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-sm">
-                    {isPollEnded ? "Ended" : formatTime(timeLeftMs)}
-                  </div>
                 </div>
               </div>
             </div>

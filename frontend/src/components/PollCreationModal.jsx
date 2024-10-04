@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { X, Plus, Minus } from 'lucide-react';
 import api from '../services/api';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
@@ -10,6 +11,48 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [duration, setDuration] = useState(60);
+  const [presets, setPresets] = useState([]);
+  const [selectedPresetId, setSelectedPresetId] = useState('');
+  const [isActivePoll, setIsActivePoll] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && isOrganizer) {
+      fetchPresets();
+      checkActivePoll();
+    }
+  }, [isOpen, isOrganizer, eventId]);
+
+  const fetchPresets = async () => {
+    try {
+      const response = await api.get(`/events/${eventId}/poll-presets`);
+      setPresets(response.data);
+    } catch (error) {
+      showErrorToast('Failed to fetch poll presets');
+    }
+  };
+
+  const checkActivePoll = async () => {
+    try {
+      const response = await api.get(`/events/${eventId}/active-poll`);
+      setIsActivePoll(!!response.data.activePoll);
+    } catch (error) {
+      console.error('Error checking active poll:', error);
+    }
+  };
+
+  const handlePresetChange = (presetId) => {
+    setSelectedPresetId(presetId);
+    if (presetId !== 'none') {
+      const selectedPreset = presets.find(preset => preset._id === presetId);
+      setQuestion(selectedPreset.question);
+      setOptions(selectedPreset.options.map(option => option.text));
+      setDuration(selectedPreset.duration);
+    } else {
+      setQuestion('');
+      setOptions(['', '']);
+      setDuration(60);
+    }
+  };
 
   const handleAddOption = () => {
     if (options.length < 5) {
@@ -36,12 +79,16 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
       showErrorToast('You do not have permission to create polls');
       return;
     }
+    if (isActivePoll) {
+      showErrorToast('There is already an active poll. Please wait for it to end before creating a new one.');
+      return;
+    }
     try {
       await api.post(`/polls/${eventId}`, { question, options, duration });
       showSuccessToast('Poll created successfully');
       onClose();
     } catch (error) {
-      showErrorToast('Failed to create poll');
+      showErrorToast('Failed to create poll: ' + (error.response?.data?.details || error.message));
     }
   };
 
@@ -57,6 +104,20 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
           </Button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="preset">Use Preset</Label>
+            <Select onValueChange={handlePresetChange} value={selectedPresetId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a preset" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {presets.map(preset => (
+                  <SelectItem key={preset._id} value={preset._id}>{preset.question}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <Label htmlFor="question">Question</Label>
             <Input
@@ -99,7 +160,9 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
               required
             />
           </div>
-          <Button type="submit" className="w-full">Create Poll</Button>
+          <Button type="submit" className="w-full" disabled={isActivePoll}>
+            {isActivePoll ? 'Poll in Progress' : 'Create Poll'}
+          </Button>
         </form>
       </div>
     </div>

@@ -83,6 +83,10 @@ function MessageWall() {
       setActivePoll(prev => prev && prev._id === endedPoll._id ? endedPoll : prev);
     });
   
+    socket.on('poll removed', (removedPollId) => {
+      setActivePoll(prev => prev && prev._id === removedPollId ? null : prev);
+    });
+  
     socket.on('poll deleted', (deletedPollId) => {
       setActivePoll(prev => prev && prev._id === deletedPollId ? null : prev);
     });
@@ -94,6 +98,7 @@ function MessageWall() {
       socket.off('new poll');
       socket.off('poll update');
       socket.off('poll ended');
+      socket.off('poll removed');
       socket.off('poll deleted');
       socket.emit('leave event', id);
     };
