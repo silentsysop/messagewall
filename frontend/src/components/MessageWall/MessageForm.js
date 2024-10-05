@@ -9,7 +9,7 @@ import { SendIcon, SmileIcon, XIcon } from 'lucide-react';
 const emojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '🎉', '❤️', '🔥', '👀'];
 const MAX_CHARACTERS = 255;
 
-function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown }) {
+function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, isAdmin, cooldownEnabled }) {
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
   const [showNameField, setShowNameField] = useState(true);
@@ -19,13 +19,13 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown }) 
 
   useEffect(() => {
     let timer;
-    if (remainingCooldown > 0) {
+    if (cooldownEnabled && remainingCooldown > 0) {
       timer = setInterval(() => {
         setRemainingCooldown(prev => Math.max(0, prev - 1));
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [remainingCooldown]);
+  }, [remainingCooldown, cooldownEnabled]);
 
   useEffect(() => {
     setRemainingCooldown(cooldown);
@@ -160,11 +160,11 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown }) 
         <Button 
           type="submit" 
           variant="primary" 
-          disabled={content.length === 0 || content.length > MAX_CHARACTERS || remainingCooldown > 0}
+          disabled={content.length === 0 || content.length > MAX_CHARACTERS || (cooldownEnabled && remainingCooldown > 0)}
           className="whitespace-nowrap"
         >
           <SendIcon className="h-4 w-4 mr-2" />
-          {remainingCooldown > 0 ? `${remainingCooldown.toFixed(0)}s` : 'Send'}
+          {cooldownEnabled && remainingCooldown > 0 ? `${remainingCooldown.toFixed(0)}s` : 'Send'}
         </Button>
       </div>
     </form>

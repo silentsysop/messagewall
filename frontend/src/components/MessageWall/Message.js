@@ -51,9 +51,6 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
 
   const handleContextMenu = (e) => {
     e.preventDefault();
-    if (canDelete) {
-      setShowMenu(!showMenu); // Toggle the menu
-    }
   };
 
   const createBubbles = (container) => {
@@ -193,11 +190,6 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
           </button>
         </div>
       </div>
-      {canDelete && showMenu && (
-        <div className="context-menu show" ref={menuRef}>
-          <button onClick={onDelete}>Delete</button>
-        </div>
-      )}
     </div>
   );
 }

@@ -157,6 +157,7 @@ function MessageWall() {
     try {
       const response = await api.get(`/events/${id}`);
       setEvent(response.data);
+      setCooldown(response.data.cooldownEnabled ? response.data.cooldown : 0);
       console.log('Fetched event:', response.data);
     } catch (error) {
       console.error('Error fetching event:', error);
@@ -426,6 +427,7 @@ function MessageWall() {
                 setReplyTo={setReplyTo}
                 cooldown={getRemainingCooldown()}
                 isAdmin={canPerformAdminActions}
+                cooldownEnabled={event?.cooldownEnabled}
               />
             </div>
           )}
