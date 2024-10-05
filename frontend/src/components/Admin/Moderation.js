@@ -5,12 +5,32 @@ import { CheckIcon, XIcon } from 'lucide-react';
 import api from '../../services/api';
 import Layout from '../HUDlayout';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
+import socket from '../../services/socket';
 
 function Moderation() {
   const [pendingMessages, setPendingMessages] = useState([]);
 
   useEffect(() => {
     fetchPendingMessages();
+
+    // Socket event listeners
+    socket.on('new message to moderate', (newMessage) => {
+      setPendingMessages(prevMessages => [...prevMessages, newMessage]);
+    });
+
+    socket.on('message approved', (messageId) => {
+      setPendingMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+    });
+
+    socket.on('message deleted', (messageId) => {
+      setPendingMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+    });
+
+    return () => {
+      socket.off('new message to moderate');
+      socket.off('message approved');
+      socket.off('message deleted');
+    };
   }, []);
 
   const fetchPendingMessages = async () => {
@@ -25,7 +45,7 @@ function Moderation() {
   const handleApprove = async (messageId) => {
     try {
       await api.put(`/messages/approve/${messageId}`);
-      fetchPendingMessages();
+      setPendingMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
       showSuccessToast('Message approved successfully');
     } catch (error) {
       console.error('Error approving message:', error);
@@ -36,7 +56,7 @@ function Moderation() {
   const handleDelete = async (messageId) => {
     try {
       await api.delete(`/messages/${messageId}`);
-      fetchPendingMessages();
+      setPendingMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
       showSuccessToast('Message deleted successfully');
     } catch (error) {
       console.error('Error deleting message:', error);

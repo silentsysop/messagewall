@@ -40,7 +40,7 @@ exports.createMessage = async (req, res) => {
     if (savedMessage.approved) {
       io.to(eventId).emit('new message', populatedMessage);
     } else {
-      io.to(`organizer-${event.organizer}`).emit('new message to moderate', populatedMessage);
+      io.emit('new message to moderate', populatedMessage);
     }
 
     res.status(201).json(populatedMessage);
@@ -68,10 +68,16 @@ exports.getMessages = async (req, res) => {
 };
 
 exports.approveMessage = async (req, res) => {
-  const io = req.app.locals.io;  // Hae io objekti app.locals:ista
+  const io = req.app.locals.io;
 
   try {
-    const message = await Message.findById(req.params.id);
+    const message = await Message.findById(req.params.id)
+      .populate('user', 'username')
+      .populate({
+        path: 'replyTo',
+        populate: { path: 'user', select: 'username' }
+      });
+
     if (!message) {
       return res.status(404).json({ msg: 'Message not found' });
     }
@@ -84,9 +90,18 @@ exports.approveMessage = async (req, res) => {
     message.approved = true;
     await message.save();
 
-    io.to(message.event.toString()).emit('new message', message);
+    // Populate the message before emitting
+    const populatedMessage = await Message.findById(message._id)
+      .populate('user', 'username')
+      .populate({
+        path: 'replyTo',
+        populate: { path: 'user', select: 'username' }
+      });
 
-    res.json(message);
+    io.to(message.event.toString()).emit('new message', populatedMessage);
+    io.emit('message approved', message._id);
+
+    res.json(populatedMessage);
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');
@@ -106,6 +121,7 @@ exports.deleteMessage = async (req, res) => {
     }
 
     await Message.deleteOne({ _id: req.params.id });
+    io.emit('message deleted', req.params.id);
     res.json({ msg: 'Message removed' });
   } catch (error) {
     console.error(error.message);

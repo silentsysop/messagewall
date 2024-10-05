@@ -91,6 +91,10 @@ function MessageWall() {
       setActivePoll(prev => prev && prev._id === deletedPollId ? null : prev);
     });
   
+    socket.on('approval status changed', ({ requiresApproval }) => {
+      setEvent(prevEvent => ({ ...prevEvent, requiresApproval }));
+    });
+  
     return () => {
       socket.off('new message');
       socket.off('reaction updated');
@@ -100,6 +104,7 @@ function MessageWall() {
       socket.off('poll ended');
       socket.off('poll removed');
       socket.off('poll deleted');
+      socket.off('approval status changed');
       socket.emit('leave event', id);
     };
   }, [id, isScrolled]);
@@ -356,11 +361,11 @@ function MessageWall() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
-            className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 sm:p-4 mb-2 sm:mb-4 rounded-r-lg text-xs sm:text-sm"
+            className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-2 sm:p-4   rounded-r-lg text-xs sm:text-sm"
           >
             <div className="flex items-center">
               <AlertTriangle className="w-4 h-4 mr-2" />
-              <p className="font-medium">Message Approval Required</p>
+              <p className="font-medium">Messages are subject to approval by the event organizer.</p>
             </div>
           </motion.div>
         )}

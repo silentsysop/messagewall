@@ -67,15 +67,20 @@ exports.updateEvent = async (req, res) => {
       return res.status(404).json({ msg: 'Event not found' });
     }
     
-    // Change this condition
     if (req.user.role !== 'organizer') {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 
-    // Only update fields that are provided in the request body
+    // Update fields
     if (req.body.name !== undefined) event.name = req.body.name;
     if (req.body.description !== undefined) event.description = req.body.description;
-    if (req.body.requiresApproval !== undefined) event.requiresApproval = req.body.requiresApproval;
+    if (req.body.requiresApproval !== undefined) {
+      event.requiresApproval = req.body.requiresApproval;
+      // Emit socket event for approval status change
+      req.app.locals.io.to(event._id.toString()).emit('approval status changed', {
+        requiresApproval: event.requiresApproval
+      });
+    }
     if (req.body.cooldownEnabled !== undefined) event.cooldownEnabled = req.body.cooldownEnabled;
     if (req.body.cooldown !== undefined) event.cooldown = req.body.cooldown;
     if (req.body.startTime !== undefined) event.startTime = new Date(req.body.startTime);
