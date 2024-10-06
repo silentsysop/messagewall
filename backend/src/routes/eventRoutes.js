@@ -1,5 +1,5 @@
 const express = require('express');
-const { createEvent, getEvents, getEvent, updateEvent, deleteEvent, getPastEvents, addPollPreset, getPollPresets, updatePollPreset, deletePollPreset, deployPoll, getActivePoll, getPollHistory, clearPollHistory } = require('../controllers/eventController');
+const { createEvent, getEvents, getEvent, updateEvent, deleteEvent, getPastEvents, addPollPreset, getPollPresets, updatePollPreset, deletePollPreset, deployPoll, getActivePoll, getPollHistory, clearPollHistory, toggleChatLock } = require('../controllers/eventController');
 const auth = require('../middleware/auth');
 const checkRole = require('../middleware/checkRole');
 const upload = require('../middleware/upload');
@@ -65,5 +65,7 @@ router.get('/:id/active-poll', getActivePoll);
 router.get('/:id/poll-history', [auth, checkRole('organizer')], getPollHistory);
 
 router.delete('/:id/poll-history', [auth, checkRole('organizer')], clearPollHistory);
+
+router.put('/:id/toggle-chat-lock', [auth, checkRole('organizer')], toggleChatLock);
 
 module.exports = router;

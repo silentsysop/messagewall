@@ -53,7 +53,11 @@ const EventSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-  pollPresets: [PollPresetSchema]
+  pollPresets: [PollPresetSchema],
+  isChatLocked: {
+    type: Boolean,
+    default: false
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Event', EventSchema);

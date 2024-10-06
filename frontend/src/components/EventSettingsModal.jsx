@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Save, Upload, Trash2, Image as ImageIcon } from 'lucide-react';
+import { X, Save, Upload, Trash2, Image as ImageIcon, Lock, Unlock } from 'lucide-react';
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { PollPresetManager } from './PollPresetManager';
 import { PollHistory } from './PollHistory';
 
-export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
+export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatLocked, onToggleChatLock }) {
   const [name, setName] = useState(event.name);
   const [description, setDescription] = useState(event.description);
   const [requiresApproval, setRequiresApproval] = useState(event.requiresApproval);
@@ -90,12 +90,12 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-background border border-border rounded-lg p-4 sm:p-6 md:p-8 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-lg">
-        <div className="flex justify-between items-center mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Event Settings</h2>
+    <div className="fixed inset-y-0 right-0 bg-background border-l border-border w-full max-w-md overflow-y-auto shadow-lg z-50">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-foreground">Event Settings</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5 sm:h-6 sm:w-6" />
+            <X className="h-6 w-6" />
           </Button>
         </div>
         <Tabs defaultValue="general">
@@ -202,6 +202,19 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete }) {
                   />
                 </div>
               )}
+              <div>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onToggleChatLock();
+                  }}
+                  variant={isChatLocked ? "destructive" : "primary"}
+                  className="w-full flex items-center justify-center"
+                >
+                  {isChatLocked ? <Unlock className="mr-2" /> : <Lock className="mr-2" />}
+                  {isChatLocked ? 'Unlock Chat' : 'Lock Chat'}
+                </Button>
+              </div>
               <Button type="submit" className="w-full">
                 <Save className="w-4 h-4 mr-2" />
                 Save Changes

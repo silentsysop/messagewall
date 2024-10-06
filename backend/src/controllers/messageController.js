@@ -2,19 +2,25 @@ const Message = require('../models/Message');
 const Event = require('../models/Event');
 const MAX_MESSAGE_LENGTH = 255; // Add this at the top of the file
 
+
 exports.createMessage = async (req, res) => {
   const { content, eventId, name, replyTo } = req.body;
   const io = req.app.locals.io;
 
   try {
-    // Add this check
-    if (!content || content.length > MAX_MESSAGE_LENGTH) {
-      return res.status(400).json({ error: `Message content must be between 1 and ${MAX_MESSAGE_LENGTH} characters.` });
-    }
-
     const event = await Event.findById(eventId);
     if (!event) {
       return res.status(404).json({ msg: 'Event not found' });
+    }
+
+    const now = new Date();
+    if (event.isChatLocked || now < new Date(event.startTime) || now > new Date(event.endTime)) {
+      return res.status(403).json({ error: 'Chat is locked' });
+    }
+
+    // Add this check
+    if (!content || content.length > MAX_MESSAGE_LENGTH) {
+      return res.status(400).json({ error: `Message content must be between 1 and ${MAX_MESSAGE_LENGTH} characters.` });
     }
 
     const newMessage = new Message({
@@ -109,6 +115,7 @@ exports.approveMessage = async (req, res) => {
 };
 
 exports.deleteMessage = async (req, res) => {
+  const io = req.app.locals.io;
   try {
     const message = await Message.findById(req.params.id);
     if (!message) {
@@ -121,7 +128,10 @@ exports.deleteMessage = async (req, res) => {
     }
 
     await Message.deleteOne({ _id: req.params.id });
-    io.emit('message deleted', req.params.id);
+    
+    // Emit a 'message deleted' event to all clients in the event room
+    io.to(message.event.toString()).emit('message deleted', req.params.id);
+    
     res.json({ msg: 'Message removed' });
   } catch (error) {
     console.error(error.message);

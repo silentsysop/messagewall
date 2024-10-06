@@ -365,3 +365,23 @@ exports.clearPollHistory = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.toggleChatLock = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    event.isChatLocked = !event.isChatLocked;
+    await event.save();
+
+    // Emit socket event to notify clients about the chat lock status change
+    req.app.locals.io.to(event._id.toString()).emit('chat lock changed', event.isChatLocked);
+
+    res.json({ isChatLocked: event.isChatLocked });
+  } catch (error) {
+    console.error('Error toggling chat lock:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

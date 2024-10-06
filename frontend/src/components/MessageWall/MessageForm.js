@@ -9,7 +9,7 @@ import { SendIcon, SmileIcon, XIcon } from 'lucide-react';
 const emojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '🎉', '❤️', '🔥', '👀'];
 const MAX_CHARACTERS = 255;
 
-function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, isAdmin, cooldownEnabled }) {
+function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, isAdmin, cooldownEnabled, isChatLocked }) {
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
   const [showNameField, setShowNameField] = useState(true);
@@ -41,7 +41,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, is
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!content.trim() || content.length > MAX_CHARACTERS || remainingCooldown > 0) return;
+    if (!content.trim() || content.length > MAX_CHARACTERS || remainingCooldown > 0 || isChatLocked) return;
     
     try {
       const response = await api.post('/messages', { 
@@ -120,10 +120,10 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, is
             type="text"
             value={content}
             onChange={handleContentChange}
-            placeholder={replyTo ? "Type your reply..." : "Type a message..."}
+            placeholder={isChatLocked ? "Chat is locked" : (replyTo ? "Type your reply..." : "Type a message...")}
             required
             className="pr-20" // Increase right padding to make room for character count
-            disabled={remainingCooldown > 0}
+            disabled={remainingCooldown > 0 || isChatLocked}
           />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
             <span className="text-xs text-muted-foreground">
@@ -160,11 +160,11 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, is
         <Button 
           type="submit" 
           variant="primary" 
-          disabled={content.length === 0 || content.length > MAX_CHARACTERS || (cooldownEnabled && remainingCooldown > 0)}
+          disabled={content.length === 0 || content.length > MAX_CHARACTERS || (cooldownEnabled && remainingCooldown > 0) || isChatLocked}
           className="whitespace-nowrap"
         >
           <SendIcon className="h-4 w-4 mr-2" />
-          {cooldownEnabled && remainingCooldown > 0 ? `${remainingCooldown.toFixed(0)}s` : 'Send'}
+          {isChatLocked ? 'Chat Locked' : (cooldownEnabled && remainingCooldown > 0 ? `${remainingCooldown.toFixed(0)}s` : 'Send')}
         </Button>
       </div>
     </form>

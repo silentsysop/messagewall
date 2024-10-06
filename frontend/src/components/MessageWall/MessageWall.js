@@ -7,14 +7,14 @@ import Message from './Message';
 import MessageForm from './MessageForm';
 import './MessageWall.css';
 import Layout from '../HUDlayout';
-import { CalendarIcon, UsersIcon, ShieldIcon, ShareIcon, ClockIcon, SettingsIcon, AlertTriangle, FullscreenIcon, MinimizeIcon, BarChart2Icon } from 'lucide-react';
+import { CalendarIcon, UsersIcon, ShieldIcon, ShareIcon, ClockIcon, SettingsIcon, AlertTriangle, FullscreenIcon, MinimizeIcon, BarChart2Icon, Lock, Unlock } from 'lucide-react';
 import { Button } from '../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventSettingsModal } from '../EventSettingsModal';
 import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
 import { PollCreationModal } from '../PollCreationModal';
 import { PollDisplay } from '../PollDisplay';
-import { showErrorToast } from '../../utils/toast';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { useTheme } from '../../context/ThemeContext';
 
 
@@ -37,6 +37,8 @@ function MessageWall() {
   const [showPollModal, setShowPollModal] = useState(false);
   const [activePoll, setActivePoll] = useState(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const [isChatLocked, setIsChatLocked] = useState(false);
+  const [showSettingsSidebar, setShowSettingsSidebar] = useState(false);
 
   const canPerformAdminActions = user && user.role === 'organizer';
 
@@ -95,6 +97,14 @@ function MessageWall() {
       setEvent(prevEvent => ({ ...prevEvent, requiresApproval }));
     });
   
+    socket.on('message deleted', (deletedMessageId) => {
+      setMessages(prevMessages => prevMessages.filter(msg => msg._id !== deletedMessageId));
+    });
+  
+    socket.on('chat lock changed', (lockStatus) => {
+      setIsChatLocked(lockStatus);
+    });
+  
     return () => {
       socket.off('new message');
       socket.off('reaction updated');
@@ -105,6 +115,8 @@ function MessageWall() {
       socket.off('poll removed');
       socket.off('poll deleted');
       socket.off('approval status changed');
+      socket.off('message deleted'); 
+      socket.off('chat lock changed');
       socket.emit('leave event', id);
     };
   }, [id, isScrolled]);
@@ -162,6 +174,7 @@ function MessageWall() {
     try {
       const response = await api.get(`/events/${id}`);
       setEvent(response.data);
+      setIsChatLocked(response.data.isChatLocked);
       setCooldown(response.data.cooldownEnabled ? response.data.cooldown : 0);
       console.log('Fetched event:', response.data);
     } catch (error) {
@@ -182,7 +195,8 @@ function MessageWall() {
   const deleteMessage = async (messageId) => {
     try {
       await api.delete(`/messages/${messageId}`);
-      setMessages(messages.filter(message => message._id !== messageId));
+      // Remove this line as it's no longer needed
+      // setMessages(messages.filter(message => message._id !== messageId));
     } catch (error) {
       console.error('Error deleting message:', error);
     }
@@ -281,9 +295,39 @@ function MessageWall() {
     setActivePoll(null);
   };
 
+  const isChatCurrentlyLocked = () => {
+    if (!event) return true; // Assume locked if event data isn't loaded yet
+    const now = new Date();
+    return isChatLocked || now < new Date(event.startTime) || now > new Date(event.endTime);
+  };
+
+  const renderChatLockStatus = () => {
+    if (isChatCurrentlyLocked()) {
+      return (
+        <div className="flex items-center justify-center bg-red-500 text-white py-2">
+          <Lock className="mr-2" />
+          <span>Chat is currently locked</span>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const handleToggleChatLock = async () => {
+    try {
+      const response = await api.put(`/events/${id}/toggle-chat-lock`);
+      setIsChatLocked(response.data.isChatLocked);
+      showSuccessToast(`Chat ${response.data.isChatLocked ? 'locked' : 'unlocked'} successfully`);
+    } catch (error) {
+      console.error('Error toggling chat lock:', error);
+      showErrorToast('Failed to toggle chat lock');
+    }
+  };
+
   return (
     <Layout>
       <div className={`flex flex-col h-full bg-background ${spectateMode ? 'fixed inset-0 z-50 spectate-mode' : ''}`}>
+        {event && renderChatLockStatus()}
         {!spectateMode && event && (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
@@ -307,7 +351,7 @@ function MessageWall() {
                     variant="ghost"
                     size="sm"
                     className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-                    onClick={() => setShowSettingsPopup(true)}
+                    onClick={() => setShowSettingsSidebar(true)}
                   >
                     <SettingsIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
                   </Button>
@@ -423,7 +467,7 @@ function MessageWall() {
               </motion.div>
             )}
           </AnimatePresence>
-          {!spectateMode && (
+          {!spectateMode && event && (
             <div className="p-4 bg-card border-t border-border">
               <MessageForm 
                 eventId={id} 
@@ -432,7 +476,8 @@ function MessageWall() {
                 setReplyTo={setReplyTo}
                 cooldown={getRemainingCooldown()}
                 isAdmin={canPerformAdminActions}
-                cooldownEnabled={event?.cooldownEnabled}
+                cooldownEnabled={event.cooldownEnabled}
+                isChatLocked={isChatCurrentlyLocked()}
               />
             </div>
           )}
@@ -448,12 +493,14 @@ function MessageWall() {
           </Button>
         )}
       </div>
-      {showSettingsPopup && (
+      {showSettingsSidebar && (
         <EventSettingsModal
           event={event}
-          onClose={() => setShowSettingsPopup(false)}
+          onClose={() => setShowSettingsSidebar(false)}
           onUpdate={handleEventUpdate}
           onDelete={handleEventDelete}
+          isChatLocked={isChatLocked}
+          onToggleChatLock={handleToggleChatLock}
         />
       )}
       <PollCreationModal
