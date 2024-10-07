@@ -10,6 +10,7 @@ import Layout from './HUDlayout';
 import { CreateEventModal } from './CreateEventModal';
 import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toast';
 import { format, formatDistanceToNow, isToday, isTomorrow, differenceInDays, differenceInHours, isFuture, isPast } from 'date-fns';
+import config from '../config';
 
 export default function MainPage() {
   const { user } = useAuth();
@@ -177,7 +178,7 @@ export default function MainPage() {
         <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
           <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
             <img 
-              src={event.imageUrl ? `http://localhost:5000${event.imageUrl}` : './placeholder.jpg'} 
+              src={event.imageUrl ? `${config.socketUrl}${event.imageUrl}` : './placeholder.jpg'} 
               alt={event.name} 
               className="absolute inset-0 h-full w-full object-cover rounded-md"
             />

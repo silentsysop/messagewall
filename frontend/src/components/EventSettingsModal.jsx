@@ -10,6 +10,7 @@ import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toa
 import { format } from 'date-fns';
 import { PollPresetManager } from './PollPresetManager';
 import { PollHistory } from './PollHistory';
+import config from '../config';
 
 export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatLocked, onToggleChatLock }) {
   const [name, setName] = useState(event.name);
@@ -18,7 +19,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
   const [cooldownEnabled, setCooldownEnabled] = useState(event.cooldownEnabled);
   const [cooldown, setCooldown] = useState(event.cooldown);
   const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(event.imageUrl ? `http://localhost:5000${event.imageUrl}` : null);
+  const [imagePreview, setImagePreview] = useState(event.imageUrl ? `${config.socketUrl}${event.imageUrl}` : null);
   const [clearImage, setClearImage] = useState(false);
   const [startTime, setStartTime] = useState(format(new Date(event.startTime), "yyyy-MM-dd'T'HH:mm"));
   const [endTime, setEndTime] = useState(format(new Date(event.endTime), "yyyy-MM-dd'T'HH:mm"));
