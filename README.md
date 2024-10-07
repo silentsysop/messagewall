@@ -27,11 +27,13 @@ MessageWall is a real-time event messaging platform that allows event organizers
 - 👀 Spectator mode for fullscreen message viewing
 - 👍 Message reactions (thumbs up/down)
 - 🔄 Automatic removal of ended events
+- 🔒 Chat locking functionality
+- 📊 Poll history, presets and management
 
 ## 🚀 Coming Soon
 - 🔔 Push notification system
 - 🔍 Search functionality for events
-- 🛡️ Advanced chat moderation (ban, timeout, lock chat)
+- 🛡️ Advanced chat moderation (ban, timeout)
 & more
 
 ## 🛠️ Tech Stack
@@ -85,83 +87,55 @@ To give yourself organizer/admin privileges:
    ```
    MONGODB_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret
+   PORT=5000
+   FRONTEND_URL=http://localhost:3000
    ```
 
-4. Start the backend server
+4. Create a `.env` file in the frontend directory with the following content:
    ```
-   cd backend && node src/app.js
+   REACT_APP_BACKEND_URL=http://localhost:5000/api
+   REACT_APP_SOCKET_URL=http://localhost:5000
    ```
 
-5. In a new terminal, start the frontend development server
+5. Start the backend server
+   ```
+   cd backend && npm start
+   ```
+
+6. In a new terminal, start the frontend development server
    ```
    cd frontend && npm start
    ```
 
-6. Open your browser and navigate to `http://localhost:3000`
+7. Open your browser and navigate to `http://localhost:3000`
 
 ### Installation (production)
-Repeat same steps 1-3 from development installation then:
+Repeat same steps 1-4 from development installation then:
 
-4. Configure the backend:
-Modify the `config.js` file in the frontend/src directory if you want to release to production:
-   ```
-   const config = {
-     development: {
-       backendUrl: 'http://localhost:5000/api',
-       socketUrl: 'http://localhost:5000',
-     },
-     production: {
-       backendUrl: 'https://your-production-backend-url.com/api',
-       socketUrl: 'https://your-production-backend-url.com',
-     }
-   };
-   
-   const env = 'development'; // Change to 'production' for production build
-   
-   export default config[env];
-   ```
-
-5. Configure the frontend:
-Modify the `config.js` file in the backend/src/config directory if you want to release to production:
-   ```
-   const config = {
-     development: {
-       frontendUrl: 'http://localhost:3000',
-     },
-     production: {
-       frontendUrl: 'https://your-production-frontend-url.com',
-     }
-   };
-   
-   const env = 'development'; // Change to 'production' for production build
-   
-   module.exports = config[env];
-   ``` 
-
-6. Build the frontend:
+4. Build the frontend:
    ```
    cd ../frontend && npm run build
    ```
 
 #### Option 1: Using serve with PM2 (Simpler for Low to Medium Traffic Setup)
-7. Install serve and PM2 globally:
+5. Install serve and PM2 globally:
    ```
    npm install -g serve pm2
    ```
 
-8. Start the backend with PM2:
+6. Start the backend with PM2:
    ```
    cd ../backend
-   pm2 start src/App.js --name "messagewall-backend"
+   pm2 start server.js --name "messagewall-backend"
    ```
 
-9. Start the frontend with PM2 (port = 3000):
+7. Start the frontend with PM2 (port = 3000):
    ```
    cd ../frontend
    pm2 serve build 3000 --name "messagewall-frontend"
    ```
 
-10. Check status and set up PM2 to start on system reboot:
+8. Check status and set up PM2 to start on system reboot:
    ```
    pm2 list
    pm2 startup
