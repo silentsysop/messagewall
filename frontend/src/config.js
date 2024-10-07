@@ -1,12 +1,12 @@
 const config = {
     development: {
-      backendUrl: 'http://localhost:5000/api', // http://localhost:5000/api
-      socketUrl: 'http://localhost:5000', // http://localhost:5000
+      backendUrl: process.env.REACT_APP_BACKEND_URL, // http://localhost:5000/api
+      socketUrl: process.env.REACT_APP_SOCKET_URL, // http://localhost:5000
 
     },
     production: {
-      backendUrl: 'https://your-production-backend-url.com/api',
-      socketUrl: 'https://your-production-backend-url.com',
+      backendUrl: process.env.REACT_APP_BACKEND_URL, // https://your-production-backend-url.com/api
+      socketUrl: process.env.REACT_APP_SOCKET_URL, // https://your-production-backend-url.com
     }
   };
   

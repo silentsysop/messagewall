@@ -1,19 +1,13 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const http = require('http');
-const socketIo = require('socket.io');
-const connectDB = require('./config/database');
-const authRoutes = require('./routes/authRoutes');
-const eventRoutes = require('./routes/eventRoutes');
-const messageRoutes = require('./routes/messageRoutes');
-const path = require('path');
-const userRoutes = require('./routes/userRoutes');
-const pollRoutes = require('./routes/pollRoutes');
 const config = require('./config/config');
-
-const app = express();
+const socketIo = require('socket.io');
+const app = require('./App');
+const http = require('http');
 const server = http.createServer(app);
+
+console.log('config', config);
+
+
 const io = socketIo(server, {
   cors: {
     origin: config.frontendUrl,
@@ -21,28 +15,8 @@ const io = socketIo(server, {
   }
 });
 
-// Connect to MongoDB
-connectDB();
-
-app.use(cors());
-app.use(express.json());
-
 // Set io object in app.locals to be accessible in routes
 app.locals.io = io;
-
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/polls', pollRoutes);
-
-// Serve static files in uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
 
 // Add this new code for handling active users
 const activeUsers = new Map();
@@ -99,5 +73,3 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-module.exports = { app, server };
