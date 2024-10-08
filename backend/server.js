@@ -9,6 +9,7 @@ console.log('config', config);
 
 
 
+
 const io = socketIo(server, {
   cors: {
     origin: config.frontendUrl,

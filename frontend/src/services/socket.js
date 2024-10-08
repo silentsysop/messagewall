@@ -11,4 +11,6 @@ const socket = io(socketURL,{
   path: socketPath,
 });
 
+console.log('socket', socket);
+
 export default socket;
