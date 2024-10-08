@@ -8,6 +8,7 @@ const server = http.createServer(app);
 console.log('config', config);
 
 
+
 const io = socketIo(server, {
   cors: {
     origin: config.frontendUrl,
@@ -15,6 +16,8 @@ const io = socketIo(server, {
   },
   path: process.env.SOCKET_IO_PATH || '/socket.io'
 });
+
+console.log('process.env.SOCKET_IO_PATH', process.env.SOCKET_IO_PATH);
 
 // Set io object in app.locals to be accessible in routes
 app.locals.io = io;

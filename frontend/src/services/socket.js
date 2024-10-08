@@ -1,9 +1,14 @@
 
 import io from 'socket.io-client';
-import config from '../config';
 
-const socket = io(config.socketUrl,{
-  path: process.env.REACT_APP_SOCKET_PATH || '/socket.io',
+const socketURL = process.env.REACT_APP_SOCKET_URL;
+const socketPath = process.env.REACT_APP_SOCKET_PATH;
+
+console.log('socketUrl', socketURL);
+console.log('REACT_APP_SOCKET_PATH', socketPath);
+
+const socket = io(socketURL,{
+  path: socketPath,
 });
 
 export default socket;
