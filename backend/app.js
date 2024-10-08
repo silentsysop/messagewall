@@ -20,11 +20,11 @@ app.use(express.json());
 
 
 
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/polls', pollRoutes);
+app.use('/messagewall/api/auth', authRoutes);
+app.use('/messagewall/api/events', eventRoutes);
+app.use('/messagewall/api/messages', messageRoutes);
+app.use('/messagewall/api/users', userRoutes);
+app.use('/messagewall/api/polls', pollRoutes);
 
 // Serve static files in uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
