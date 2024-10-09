@@ -3,6 +3,7 @@ import './Message.css';
 import { Trash2, ReplyIcon, ThumbsUp, ThumbsDown } from 'lucide-react'; // Import the reply icon
 import api from '../../services/api';
 import { toast } from 'react-hot-toast'; // Import toast
+import { logger } from '../../utils/logger'
 
 function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
   const [showMenu, setShowMenu] = useState(false);
@@ -13,14 +14,14 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
   const menuRef = useRef(null);
   const bubbleRef = useRef(null);
 
-  console.log('Message user:', message.user);
-  console.log('Event:', event);
+  //logger.log('Message user:', message.user);
+  //logger.log('Event:', event);
 
   const isEventCreator = message.user && event && event.organizer && message.user._id === event.organizer._id;
   const isOrganizer = message.user && message.user.role === 'organizer';
 
-  console.log('Is Event Creator:', isEventCreator);
-  console.log('Is Organizer:', isOrganizer);
+  //logger.log('Is Event Creator:', isEventCreator);
+  //logger.log('Is Organizer:', isOrganizer);
 
   useEffect(() => {
     function handleClickOutside(event) {

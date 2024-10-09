@@ -9,6 +9,7 @@ import { X } from 'lucide-react';
 import api from '../services/api';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
 import { format } from 'date-fns';
+import { logger } from '../utils/logger'
 
 export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
   const [name, setName] = useState('');
@@ -41,7 +42,7 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }) {
           'Content-Type': 'multipart/form-data'
         }
       });
-      console.log('Event created:', response.data);
+      logger.log('Event created:', response.data);
       onEventCreated(response.data);
       showSuccessToast('Event created successfully');
       onClose();

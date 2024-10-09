@@ -12,10 +12,10 @@ const io = socketIo(server, {
     origin: config.frontendUrl,
     methods: ["GET", "POST"]
   },
-  path: process.env.SOCKET_IO_PATH || '/socket.io'
+  path: process.env.SOCKET_IO_PATH || '/messagewall/socket.io'
 });
 
-console.log('Socket.IO path:', process.env.SOCKET_IO_PATH || '/socket.io');
+console.log('Socket.IO server initialized with path:', process.env.SOCKET_IO_PATH || '/messagewall/socket.io');
 
 // Set io object in app.locals to be accessible in routes
 app.locals.io = io;

@@ -20,7 +20,7 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-const BASE_URL = process.env.BASE_URL || '/';
+const BASE_URL = process.env.BASE_URL;
 
 app.use(`${BASE_URL}/auth`, authRoutes);
 app.use(`${BASE_URL}/events`, eventRoutes);

@@ -5,6 +5,7 @@ import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { SendIcon, SmileIcon, XIcon } from 'lucide-react';
+import { logger } from '../../utils/logger'
 
 const emojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '🎉', '❤️', '🔥', '👀'];
 const MAX_CHARACTERS = 255;
@@ -50,7 +51,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, is
         name: user ? user.username : (name || undefined),
         replyTo: replyTo ? replyTo._id : undefined
       });
-      console.log('Message sent:', response.data);
+      logger.log('Message sent:', response.data);
       setContent('');
       setReplyTo(null);
       if (name && !user) {

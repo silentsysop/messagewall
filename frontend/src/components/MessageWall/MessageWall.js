@@ -16,6 +16,7 @@ import { PollCreationModal } from '../PollCreationModal';
 import { PollDisplay } from '../PollDisplay';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { useTheme } from '../../context/ThemeContext';
+import { logger } from '../../utils/logger';
 
 
 function MessageWall() {
@@ -50,12 +51,15 @@ function MessageWall() {
 
 
   useEffect(() => {
+    logger.log('MessageWall component mounted');
     fetchEvent();
     fetchMessages();
   
+    logger.log('Emitting join event for:', id);
     socket.emit('join event', id);
   
     socket.on('new message', (newMessage) => {
+      logger.log('Received new message:', newMessage);
       setMessages(prevMessages => [...prevMessages, newMessage]);
       if (!isScrolled) {
         scrollToBottom();
@@ -106,6 +110,7 @@ function MessageWall() {
     });
   
     return () => {
+      logger.log('MessageWall component unmounting');
       socket.off('new message');
       socket.off('reaction updated');
       socket.off('user count');
@@ -117,6 +122,7 @@ function MessageWall() {
       socket.off('approval status changed');
       socket.off('message deleted'); 
       socket.off('chat lock changed');
+      logger.log('Emitting leave event for:', id);
       socket.emit('leave event', id);
     };
   }, [id, isScrolled]);

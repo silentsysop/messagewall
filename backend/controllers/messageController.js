@@ -44,8 +44,10 @@ exports.createMessage = async (req, res) => {
       });
 
     if (savedMessage.approved) {
+      console.log('Emitting new message to room:', eventId);
       io.to(eventId).emit('new message', populatedMessage);
     } else {
+      console.log('Emitting new message to moderate');
       io.emit('new message to moderate', populatedMessage);
     }
 

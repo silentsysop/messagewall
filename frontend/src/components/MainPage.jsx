@@ -11,6 +11,7 @@ import { CreateEventModal } from './CreateEventModal';
 import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toast';
 import { format, formatDistanceToNow, isToday, isTomorrow, differenceInDays, differenceInHours, isFuture, isPast } from 'date-fns';
 import config from '../config';
+import { logger } from '../utils/logger'
 
 export default function MainPage() {
   const { user } = useAuth();
@@ -67,7 +68,7 @@ export default function MainPage() {
     try {
       const response = await api.get('/users/saved-events');
       setSavedEvents(response.data.map(event => event._id));
-      console.log(response.data);
+      logger.log(response.data);
     } catch (error) {
       console.error('Error fetching saved events:', error);
     }
