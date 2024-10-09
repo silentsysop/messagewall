@@ -30,20 +30,22 @@ export default function Layout({ children }) {
     setShowUserMenu(false);
   };
 
+  const basename = process.env.REACT_APP_BASENAME || '';
+
   return (
     <div className="flex h-screen w-full flex-col bg-background text-foreground">
       <header className="flex h-16 shrink-0 items-center justify-between border-b border-muted px-4 md:px-6">
         <Link to="/" className="flex items-center gap-2 text-lg font-semibold">
-          <img src="/vakslogo_kuvake.png" alt="VAKS Logo" className="h-6 w-6" />
+          <img src={`${basename}vakslogo_kuvake.png`} alt="VAKS Logo" className="h-6 w-6" />
           <span className="hidden md:inline">VAKS-Viestiseinä</span>
         </Link>
-        
+
         <nav className="flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
             <CalendarIcon className="h-5 w-5"  />
             <span className="hidden md:inline">Events</span>
           </Link>
-          
+
           {user ? (
             <>
               {user.role === 'organizer' && (
@@ -59,16 +61,16 @@ export default function Layout({ children }) {
                 <BellIcon className="h-5 w-5" />
               </Button>
               <div className="relative" ref={menuRef}>
-                <Avatar 
-                  className="h-8 w-8 border cursor-pointer" 
+                <Avatar
+                  className="h-8 w-8 border cursor-pointer"
                   onClick={() => setShowUserMenu(!showUserMenu)}
                 >
-                  <AvatarImage src="/placeholder-user.jpg" alt="Avatar" />
+                  <AvatarImage src={`${basename}placeholder-user.jpg`} alt="Avatar" />
                   <AvatarFallback>AC</AvatarFallback>
                 </Avatar>
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-background border border-muted rounded-md shadow-lg py-1 z-10">
-                    <button 
+                    <button
                       onClick={handleLogout}
                       className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
                     >
@@ -94,7 +96,7 @@ export default function Layout({ children }) {
           <ThemeToggle />
         </nav>
       </header>
-      
+
       <div className="flex flex-1 overflow-hidden">
         <nav className="hidden h-full w-64 flex-col border-r border-muted bg-muted-foreground/5 px-4 py-6 md:flex">
           <div className="mb-6 flex items-center gap-2">
