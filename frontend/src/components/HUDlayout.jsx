@@ -30,7 +30,11 @@ export default function Layout({ children }) {
     setShowUserMenu(false);
   };
 
-  const basename = process.env.REACT_APP_BASENAME || '';
+  let  basename = process.env.REACT_APP_BASENAME || '';
+
+  if (basename === '/') {
+    basename = '';
+  }
 
   return (
     <div className="flex h-screen w-full flex-col bg-background text-foreground">
