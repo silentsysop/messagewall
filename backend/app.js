@@ -18,13 +18,13 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+const BASE_URL = process.env.BASE_URL || '/';
 
-
-app.use('/messagewall/api/auth', authRoutes);
-app.use('/messagewall/api/events', eventRoutes);
-app.use('/messagewall/api/messages', messageRoutes);
-app.use('/messagewall/api/users', userRoutes);
-app.use('/messagewall/api/polls', pollRoutes);
+app.use(`${BASE_URL}/auth`, authRoutes);
+app.use(`${BASE_URL}/events`, eventRoutes);
+app.use(`${BASE_URL}/messages`, messageRoutes);
+app.use(`${BASE_URL}/users`, userRoutes);
+app.use(`${BASE_URL}/polls`, pollRoutes);
 
 // Serve static files in uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
