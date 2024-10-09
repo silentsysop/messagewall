@@ -8,12 +8,17 @@ const server = http.createServer(app);
 console.log('config', config);
 
 
+
+
 const io = socketIo(server, {
   cors: {
     origin: config.frontendUrl,
     methods: ["GET", "POST"]
-  }
+  },
+  path: process.env.SOCKET_IO_PATH || '/socket.io'
 });
+
+console.log('process.env.SOCKET_IO_PATH', process.env.SOCKET_IO_PATH);
 
 // Set io object in app.locals to be accessible in routes
 app.locals.io = io;
@@ -23,15 +28,15 @@ const activeUsers = new Map();
 
 io.on('connection', (socket) => {
   console.log('New client connected');
-  
+
   socket.on('join event', (eventId) => {
     socket.join(eventId);
-    
+
     if (!activeUsers.has(eventId)) {
       activeUsers.set(eventId, new Set());
     }
     activeUsers.get(eventId).add(socket.id);
-    
+
     io.to(eventId).emit('user count', activeUsers.get(eventId).size);
     console.log(`Client joined event: ${eventId}. Active users: ${activeUsers.get(eventId).size}`);
   });

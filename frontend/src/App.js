@@ -11,7 +11,7 @@ import PastEvents from './components/PastEvents';
 import { ThemeProvider } from './context/ThemeContext';
 
 import './globals.css';
-import MainPage from './components/MainPage'; 
+import MainPage from './components/MainPage';
 import SavedEvents from './components/SavedEvents';
 
 function RequireAuth({ children, allowedRoles }) {
@@ -29,27 +29,30 @@ function RequireAuth({ children, allowedRoles }) {
 }
 
 function AppRoutes() {
+
+  const basename = process.env.REACT_APP_BASENAME || '';
+
   return (
-    <Router>
+    <Router basename={basename}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/event/:id" element={<MessageWall />} />
-        <Route 
-          path="/create-event" 
+        <Route
+          path="/create-event"
           element={
             <RequireAuth allowedRoles={['organizer']}>
               <EventCreation />
             </RequireAuth>
-          } 
+          }
         />
-        <Route 
-          path="/moderate" 
+        <Route
+          path="/moderate"
           element={
             <RequireAuth allowedRoles={['organizer']}>
               <Moderation />
             </RequireAuth>
-          } 
+          }
         />
         <Route path="/" element={<MainPage />} />
         <Route path="/saved-events" element={<SavedEvents />} />
@@ -64,7 +67,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <AppRoutes />
-        <Toaster 
+        <Toaster
           position="top-center"
           reverseOrder={true}
           toastOptions={{
