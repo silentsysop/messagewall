@@ -7,9 +7,6 @@ const server = http.createServer(app);
 
 console.log('config', config);
 
-
-
-
 const io = socketIo(server, {
   cors: {
     origin: config.frontendUrl,
@@ -18,7 +15,7 @@ const io = socketIo(server, {
   path: process.env.SOCKET_IO_PATH || '/socket.io'
 });
 
-console.log('process.env.SOCKET_IO_PATH', process.env.SOCKET_IO_PATH);
+console.log('Socket.IO path:', process.env.SOCKET_IO_PATH || '/socket.io');
 
 // Set io object in app.locals to be accessible in routes
 app.locals.io = io;
@@ -27,9 +24,10 @@ app.locals.io = io;
 const activeUsers = new Map();
 
 io.on('connection', (socket) => {
-  console.log('New client connected');
+  console.log('New client connected', socket.id);
 
   socket.on('join event', (eventId) => {
+    console.log(`Client ${socket.id} joined event: ${eventId}`);
     socket.join(eventId);
 
     if (!activeUsers.has(eventId)) {
@@ -60,7 +58,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
+    console.log('Client disconnected', socket.id);
   });
 
   socket.on('new poll', (poll) => {

@@ -12,6 +12,8 @@ const pollRoutes = require('./routes/pollRoutes');
 const app = express();
 
 
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDB();
 
