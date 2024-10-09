@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Layout from './HUDlayout';
 import { format } from 'date-fns';
+import config from '../config';
 
 export default function PastEvents() {
   const { user } = useAuth();
@@ -77,7 +78,7 @@ export default function PastEvents() {
       <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
         <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
           <img 
-            src={event.imageUrl ? `http://localhost:5000${event.imageUrl}` : '/placeholder-event.jpg'} 
+            src={event.imageUrl ? `${config.socketUrl}${event.imageUrl}` : '/placeholder-event.jpg'} 
             alt={event.name} 
             className="absolute inset-0 h-full w-full object-cover rounded-md"
           />
