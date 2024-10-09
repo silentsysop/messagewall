@@ -89,12 +89,16 @@ To give yourself organizer/admin privileges:
    JWT_SECRET=your_jwt_secret
    PORT=5000
    FRONTEND_URL=http://localhost:3000
+   SOCKET_IO_PATH=/socket.io
+   BASE_URL=/api
    ```
 
 4. Create a `.env` file in the frontend directory with the following content:
    ```
    REACT_APP_BACKEND_URL=http://localhost:5000/api
    REACT_APP_SOCKET_URL=http://localhost:5000
+   REACT_APP_SOCKET_PATH=/socket.io
+   REACT_APP_BASENAME=/
    ```
 
 5. Start the backend server
