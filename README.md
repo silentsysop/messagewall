@@ -113,6 +113,42 @@ To give yourself organizer/admin privileges:
 
 7. Open your browser and navigate to `http://localhost:3000`
 
+#### Running on subdirectories
+
+1. If you want to run the project on your subdirectory for example `http://localhost:3000/messagewall`,
+   start by editing your frontend `.env` file like this:
+   ```
+   REACT_APP_BACKEND_URL=http://localhost:5000/api
+   REACT_APP_SOCKET_URL=http://localhost:5000/messagewall
+   REACT_APP_SOCKET_PATH=/messagewall/socket.io
+   REACT_APP_BASENAME=/messagewall
+   ```
+
+2. Backend's `.env` file:
+   ```
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   PORT=5000
+   FRONTEND_URL=http://localhost:3000
+   SOCKET_IO_PATH=/messagewall/socket.io
+   BASE_URL=/api
+   ```
+
+3. In your frontend package.json change the `homepage`
+   ```
+   "homepage": "/messagewall",
+   ```
+
+4. Start the backend server
+   ```
+   cd backend && npm start
+   ```
+
+5. In a new terminal, start the frontend development server
+   ```
+   cd frontend && npm start
+   ```
+
 ### Installation (production)
 Repeat same steps 1-4 from development installation then:
 
