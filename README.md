@@ -99,6 +99,7 @@ To give yourself organizer/admin privileges:
    REACT_APP_SOCKET_URL=http://localhost:5000
    REACT_APP_SOCKET_PATH=/socket.io
    REACT_APP_BASENAME=/
+   REACT_APP_ENABLE_LOGS=true
    ```
 
 5. Start the backend server
@@ -118,10 +119,11 @@ To give yourself organizer/admin privileges:
 1. If you want to run the project on your subdirectory for example `http://localhost:3000/messagewall`,
    start by editing your frontend `.env` file like this:
    ```
-   REACT_APP_BACKEND_URL=http://localhost:5000/api
-   REACT_APP_SOCKET_URL=http://localhost:5000/messagewall
+   REACT_APP_BACKEND_URL=http://localhost:5000/messagewall/api
+   REACT_APP_SOCKET_URL=http://localhost:5000
    REACT_APP_SOCKET_PATH=/messagewall/socket.io
    REACT_APP_BASENAME=/messagewall
+   REACT_APP_ENABLE_LOGS=true
    ```
 
 2. Backend's `.env` file:
@@ -131,10 +133,10 @@ To give yourself organizer/admin privileges:
    PORT=5000
    FRONTEND_URL=http://localhost:3000
    SOCKET_IO_PATH=/messagewall/socket.io
-   BASE_URL=/api
+   BASE_URL=/messagewall/api
    ```
 
-3. In your frontend package.json change the `homepage`
+3. In your frontend package.json change/add the `homepage` on top of the name
    ```
    "homepage": "/messagewall",
    ```
