@@ -1,15 +1,12 @@
 require('dotenv').config();
-const config = require('./config/config');
 const socketIo = require('socket.io');
 const app = require('./app');
 const http = require('http');
 const server = http.createServer(app);
 
-console.log('config', config);
-
 const io = socketIo(server, {
   cors: {
-    origin: config.frontendUrl,
+    origin: process.env.FRONTEND_URL || '*',
     methods: ["GET", "POST"]
   },
   path: process.env.SOCKET_IO_PATH || '/messagewall/socket.io'
