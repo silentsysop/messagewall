@@ -179,7 +179,7 @@ export default function MainPage() {
         <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
           <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
             <img
-              src={event.imageUrl ? `${config.backendUrl}${event.imageUrl}` : './placeholder.jpg'}
+              src={event.imageUrl ? `${process.env.REACT_APP_BASENAME}${event.imageUrl}` : './placeholder.jpg'}
               alt={event.name}
               className="absolute inset-0 h-full w-full object-cover rounded-md"
             />
