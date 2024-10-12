@@ -178,7 +178,7 @@ export default function MainPage() {
     return (
       <Card key={event._id} className={`group relative rounded-lg shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl ${viewMode === 'list' ? 'flex' : ''}`}>
         <Link to={`/event/${event._id}`} className="absolute inset-0 z-10">
-          <span className="sr-only">View event</span>
+          <span className="sr-only">{t('common.viewEvent')}</span>
         </Link>
         <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
           <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
@@ -206,7 +206,7 @@ export default function MainPage() {
                   </AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium">
-                {event.organizer && event.organizer.username ? event.organizer.username : 'Unknown Organizer'}
+                {event.organizer && event.organizer.username ? event.organizer.username : t('common.unknownOrganizer')}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 ml-auto">
@@ -283,16 +283,16 @@ export default function MainPage() {
             <p className="text-muted-foreground">{t('mainPage.browseEvents')}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setViewMode('grid')} aria-label="Grid view">
+            <Button variant="ghost" size="icon" onClick={() => setViewMode('grid')} aria-label={t('mainPage.gridView')}>
               <LayoutGrid className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => setViewMode('list')} aria-label="List view">
+            <Button variant="ghost" size="icon" onClick={() => setViewMode('list')} aria-label={t('mainPage.listView')}>
               <List className="h-5 w-5" />
             </Button>
             {user && user.role === 'organizer' && (
               <Button variant="outline" onClick={() => setIsCreateModalOpen(true)}>
                 <PlusIcon className="h-4 w-4 mr-2" />
-                Create Event
+                {t('mainPage.createEvent')}
               </Button>
             )}
           </div>
@@ -301,7 +301,7 @@ export default function MainPage() {
           {events.length > 0 ? (
             events.map(renderEventCard)
           ) : (
-            <p className="text-muted-foreground">No upcoming events at the moment.</p>
+            <p className="text-muted-foreground">{t('mainPage.noEvents')}</p>
           )}
         </div>
       </div>

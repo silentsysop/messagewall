@@ -77,7 +77,7 @@
     "message": {
       "deletedMessage": "Tämä viesti on poistettu",
       "editedMessage": "Muokattu",
-      "replyTo": "Vastaa",
+      "replyTo": "Vastaus",
       "showMore": "Näytä lisää",
       "showLess": "Näytä vähemmän",
       "copyMessage": "Kopioi viesti",
@@ -132,7 +132,9 @@
       "successSaving": "Tapahtuman asetukset tallennettu onnistuneesti",
       "errorSaving": "Virhe tapahtuman asetusten tallentamisessa",
       "successDeleting": "Tapahtuma poistettu onnistuneesti",
-      "errorDeleting": "Virhe tapahtuman poistamisessa"
+      "errorDeleting": "Virhe tapahtuman poistamisessa",
+      "enableApproval": "Ota hyväksyntä käyttöön",
+      "disableApproval": "Poista hyväksyntä käytöstä"
     },
     "pollCreation": {
       "createPoll": "Luo kysely",

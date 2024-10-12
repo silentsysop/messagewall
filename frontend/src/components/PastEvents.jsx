@@ -168,7 +168,7 @@ export default function PastEvents() {
           </div>
         </div>
         <div className={viewMode === 'grid' ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-4'}>
-          {events.map(renderEventCard)}
+          {events.length > 0 ? events.map(renderEventCard) : <p>{t('pastEvents.noPastEvents')}</p>}
         </div>
       </div>
     </Layout>

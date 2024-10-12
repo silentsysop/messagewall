@@ -159,7 +159,7 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
       <div className="message-bubble" ref={bubbleRef}>
         {message.replyTo && (
           <div className="replied-message">
-            <span className="replied-to">Replying to {message.replyTo.user ? message.replyTo.user.username : (message.replyTo.name || 'Anonymous')}:</span>
+            <span className="replied-to">{t('message.replyTo')} {message.replyTo.user ? message.replyTo.user.username : (message.replyTo.name || 'Anonymous')}:</span>
             <span className="replied-content">{message.replyTo.content}</span>
           </div>
         )}
@@ -180,6 +180,7 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
               onClick={() => onReply(message, () => document.getElementById('message-input').focus())}
             >
               <ReplyIcon size={14} />
+              
             </button>
             {canDelete && (
               <button 

@@ -132,7 +132,9 @@
       "successSaving": "Event settings saved successfully",
       "errorSaving": "Error saving event settings",
       "successDeleting": "Event deleted successfully",
-      "errorDeleting": "Error deleting event"
+      "errorDeleting": "Error deleting event",
+      "enableApproval": "Enable Approval",
+      "disableApproval": "Disable Approval"
     },
     "pollCreation": {
       "createPoll": "Create Poll",

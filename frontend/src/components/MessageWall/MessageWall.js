@@ -12,6 +12,7 @@ import { Button } from '../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventSettingsModal } from '../EventSettingsModal';
 import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
+import { fi, enUS } from 'date-fns/locale';
 import { PollCreationModal } from '../PollCreationModal';
 import { PollDisplay } from '../PollDisplay';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
@@ -21,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 
 
 function MessageWall() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [event, setEvent] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -265,15 +266,22 @@ function MessageWall() {
   const formatEventStartTime = (date) => {
     const now = new Date();
     const startDate = new Date(date);
+    const locale = i18n.language === 'fi' ? fi : enUS;
     
     if (isToday(startDate)) {
-      return `Today at ${format(startDate, 'h:mm a')}`;
+      return t('eventCard.today', { time: format(startDate, 'HH:mm', { locale }) });
     } else if (isTomorrow(startDate)) {
-      return `Tomorrow at ${format(startDate, 'h:mm a')}`;
+      return t('eventCard.tomorrow', { time: format(startDate, 'HH:mm', { locale }) });
     } else if (differenceInDays(startDate, now) < 7) {
-      return format(startDate, 'EEEE \'at\' h:mm a'); // e.g., "Friday at 2:30 PM"
+      return t('eventCard.thisWeek', { 
+        day: format(startDate, 'EEEE', { locale }), 
+        time: format(startDate, 'HH:mm', { locale }) 
+      });
     } else {
-      return format(startDate, 'MMM d \'at\' h:mm a'); // e.g., "Jun 15 at 2:30 PM"
+      return t('eventCard.future', { 
+        date: format(startDate, 'd.M.', { locale }), 
+        time: format(startDate, 'HH:mm', { locale }) 
+      });
     }
   };
 
@@ -317,7 +325,7 @@ function MessageWall() {
       return (
         <div className="flex items-center justify-center bg-red-500 text-white py-2">
           <Lock className="mr-2" />
-          <span>Chat is currently locked</span>
+          <span>{t('messageWall.chatLocked')}</span>
         </div>
       );
     }

@@ -120,7 +120,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
                 />
               </div>
               <div>
-                <Label htmlFor="description" className="text-sm sm:text-base">Description</Label>
+                <Label htmlFor="description" className="text-sm sm:text-base">{t('eventSettings.description')}</Label>
                 <Input
                   id="description"
                   value={description}
@@ -131,7 +131,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="startTime" className="text-sm sm:text-base">Start Time</Label>
+                  <Label htmlFor="startTime" className="text-sm sm:text-base">{t('eventSettings.startTime')}</Label>
                   <Input
                     id="startTime"
                     type="datetime-local"
@@ -142,7 +142,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
                   />
                 </div>
                 <div>
-                  <Label htmlFor="endTime" className="text-sm sm:text-base">End Time</Label>
+                  <Label htmlFor="endTime" className="text-sm sm:text-base">{t('eventSettings.endTime')}</Label>
                   <Input
                     id="endTime"
                     type="datetime-local"
@@ -154,7 +154,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
                 </div>
               </div>
               <div>
-                <Label htmlFor="image" className="text-sm sm:text-base">Event Image</Label>
+                <Label htmlFor="image" className="text-sm sm:text-base">{t('eventSettings.image')}</Label>
                 <div className="flex items-center space-x-2 mt-1">
                   <Input
                     id="image"
@@ -181,7 +181,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
                   checked={requiresApproval}
                   onCheckedChange={setRequiresApproval}
                 />
-                <Label htmlFor="requiresApproval" className="text-sm sm:text-base">Requires Approval</Label>
+                <Label htmlFor="requiresApproval" className="text-sm sm:text-base">{t('eventSettings.requiresApproval')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -189,11 +189,11 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
                   checked={cooldownEnabled}
                   onCheckedChange={setCooldownEnabled}
                 />
-                <Label htmlFor="cooldownEnabled" className="text-sm sm:text-base">Enable message cooldown</Label>
+                <Label htmlFor="cooldownEnabled" className="text-sm sm:text-base">{t('eventSettings.enableCooldown')}</Label>
               </div>
               {cooldownEnabled && (
                 <div>
-                  <Label htmlFor="cooldown" className="text-sm sm:text-base">Cooldown duration (seconds)</Label>
+                  <Label htmlFor="cooldown" className="text-sm sm:text-base">{t('eventSettings.cooldownDuration')}</Label>
                   <Input
                     id="cooldown"
                     type="number"
