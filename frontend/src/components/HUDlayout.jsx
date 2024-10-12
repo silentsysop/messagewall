@@ -1,4 +1,3 @@
-// src/components/Layout.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "./ui/button"
@@ -6,11 +5,14 @@ import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar"
 import { SearchIcon, BellIcon, CalendarIcon, LogInIcon, UserPlusIcon, ShieldIcon, LogOutIcon, HeartIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from './ui/ThemeToggle';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -47,7 +49,7 @@ export default function Layout({ children }) {
         <nav className="flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
             <CalendarIcon className="h-5 w-5"  />
-            <span className="hidden md:inline">Events</span>
+            <span className="hidden md:inline">{t('common.events')}</span>
           </Link>
 
           {user ? (
@@ -55,13 +57,13 @@ export default function Layout({ children }) {
               {user.role === 'organizer' && (
                 <Link to="/moderate" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
                   <ShieldIcon className="h-5 w-5" />
-                  <span className="hidden md:inline">Moderate</span>
+                  <span className="hidden md:inline">{t('common.moderate')}</span>
                 </Link>
               )}
-              <Button variant="ghost" size="icon" aria-label="Search">
+              <Button variant="ghost" size="icon" aria-label={t('common.search')}>
                 <SearchIcon className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" aria-label="Notifications">
+              <Button variant="ghost" size="icon" aria-label={t('common.notifications')}>
                 <BellIcon className="h-5 w-5" />
               </Button>
               <div className="relative" ref={menuRef}>
@@ -79,7 +81,7 @@ export default function Layout({ children }) {
                       className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
                     >
                       <LogOutIcon className="h-4 w-4 mr-2" />
-                      Logout
+                      {t('common.logout')}
                     </button>
                   </div>
                 )}
@@ -89,15 +91,16 @@ export default function Layout({ children }) {
             <>
               <Link to="/login" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
                 <LogInIcon className="h-5 w-5" />
-                <span className="hidden md:inline">Login</span>
+                <span className="hidden md:inline">{t('common.login')}</span>
               </Link>
               <Link to="/register" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
                 <UserPlusIcon className="h-5 w-5" />
-                <span className="hidden md:inline">Register</span>
+                <span className="hidden md:inline">{t('common.register')}</span>
               </Link>
             </>
           )}
           <ThemeToggle />
+          <LanguageSwitcher />
         </nav>
       </header>
 
@@ -105,7 +108,7 @@ export default function Layout({ children }) {
         <nav className="hidden h-full w-64 flex-col border-r border-muted bg-muted-foreground/5 px-4 py-6 md:flex">
           <div className="mb-6 flex items-center gap-2">
             <CalendarIcon className="h-5 w-5" style={{ color: '#93C01F' }}/>
-            <h2 className="text-lg font-semibold">Events</h2>
+            <h2 className="text-lg font-semibold">{t('common.events')}</h2>
           </div>
           <div className="flex-1 overflow-auto">
             <Link
@@ -113,21 +116,21 @@ export default function Layout({ children }) {
               className="mb-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted hover:text-primary"
             >
               <CalendarIcon className="h-4 w-4" />
-              <span>Upcoming Events</span>
+              <span>{t('common.upcomingEvents')}</span>
             </Link>
             <Link
               to="/past-events"
               className="mb-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted hover:text-primary"
             >
               <CalendarIcon className="h-4 w-4" />
-              <span>Past Events</span>
+              <span>{t('common.pastEvents')}</span>
             </Link>
             <Link
               to="/saved-events"
               className="mb-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted hover:text-primary"
             >
               <HeartIcon className="h-4 w-4" />
-              <span>Saved Events</span>
+              <span>{t('common.savedEvents')}</span>
             </Link>
           </div>
         </nav>

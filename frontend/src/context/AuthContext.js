@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkLoggedIn = async () => {
+    setLoading(true);
     const token = localStorage.getItem('token');
     if (token) {
       try {
@@ -22,7 +23,10 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error fetching user data:', error);
         localStorage.removeItem('token');
+        setUser(null);
       }
+    } else {
+      setUser(null);
     }
     setLoading(false);
   };
@@ -47,6 +51,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    //navigate('/');
   };
 
   return (

@@ -10,8 +10,10 @@ import Layout from './HUDlayout';
 import { CreateEventModal } from './CreateEventModal';
 import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toast';
 import { format, formatDistanceToNow, isToday, isTomorrow, differenceInDays, differenceInHours, isFuture, isPast } from 'date-fns';
+import { fi, enUS } from 'date-fns/locale';
 import config from '../config';
 import { logger } from '../utils/logger'
+import { useTranslation } from 'react-i18next';
 
 export default function MainPage() {
   const { user } = useAuth();
@@ -21,6 +23,7 @@ export default function MainPage() {
   const menuRefs = useRef({});
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     fetchUpcomingEvents();
@@ -135,39 +138,40 @@ export default function MainPage() {
     const endDate = new Date(event.endTime);
     const now = new Date();
 
-    const formatEventTime = (date) => {
-      if (isToday(date)) {
-        return `Today at ${format(date, 'h:mm a')}`;
-      } else if (isTomorrow(date)) {
-        return `Tomorrow at ${format(date, 'h:mm a')}`;
-      } else {
-        return format(date, 'MMM d, yyyy h:mm a');
-      }
-    };
-
     const getEventStatus = () => {
       if (isFuture(startDate)) {
-        return `Starts ${formatDistanceToNow(startDate, { addSuffix: true })}`;
+        const days = differenceInDays(startDate, now);
+        const hours = differenceInHours(startDate, now);
+        if (days > 0) {
+          return t('eventCard.starts') + ' ' + t('eventCard.in', { time: t('timeUnits.xDays', { count: days }) });
+        } else {
+          return t('eventCard.starts') + ' ' + t('eventCard.in', { time: t('timeUnits.aboutXHours', { count: Math.round(hours) }) });
+        }
       } else if (isFuture(endDate)) {
-        return `Ends ${formatDistanceToNow(endDate, { addSuffix: true })}`;
+        const days = differenceInDays(endDate, now);
+        const hours = differenceInHours(endDate, now);
+        if (days > 0) {
+          return t('eventCard.ends') + ' ' + t('eventCard.in', { time: t('timeUnits.xDays', { count: days }) });
+        } else {
+          return t('eventCard.ends') + ' ' + t('eventCard.in', { time: t('timeUnits.aboutXHours', { count: Math.round(hours) }) });
+        }
       } else {
-        return 'Event has ended';
+        return t('eventCard.ended');
       }
     };
 
     const getDuration = () => {
-      const durationHours = differenceInHours(endDate, startDate);
-      const days = Math.floor(durationHours / 24);
-      const remainingHours = durationHours % 24;
+      const durationDays = differenceInDays(endDate, startDate);
+      return t('eventCard.duration', { 
+        duration: t('eventCard.durationDays', { count: durationDays }) 
+      });
+    };
 
-      if (days === 0) {
-        return `${durationHours} hour${durationHours !== 1 ? 's' : ''}`;
+    const formatDate = (date) => {
+      if (i18n.language === 'fi') {
+        return format(date, "LLL d, yyyy 'klo' HH:mm", { locale: fi });
       } else {
-        let duration = `${days} day${days !== 1 ? 's' : ''}`;
-        if (remainingHours > 0) {
-          duration += ` ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`;
-        }
-        return duration;
+        return format(date, 'PPP p', { locale: enUS });
       }
     };
 
@@ -188,10 +192,10 @@ export default function MainPage() {
             <h3 className="text-lg font-semibold">{event.name}</h3>
             <div className="mt-1 space-y-1">
               <p className="text-sm font-medium" style={{ color: '#93C01F' }}>{getEventStatus()}</p>
+              <p className="text-sm text-muted-foreground">{getDuration()}</p>
               <p className="text-sm text-muted-foreground">
-                {formatEventTime(startDate)} - {format(endDate, 'MMM d, yyyy h:mm a')}
+                {formatDate(startDate)} - {formatDate(endDate)}
               </p>
-              <p className="text-sm text-muted-foreground">Duration: {getDuration()}</p>
             </div>
             <p className="mt-2 text-sm flex-grow line-clamp-2">{event.description}</p>
             <div className="mt-4 flex flex-wrap items-center justify-between">
@@ -275,8 +279,8 @@ export default function MainPage() {
       <div className="container mx-auto py-8 px-4 md:px-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Upcoming Events</h1>
-            <p className="text-muted-foreground">Browse and join upcoming events.</p>
+            <h1 className="text-2xl font-bold">{t('mainPage.upcomingEvents')}</h1>
+            <p className="text-muted-foreground">{t('mainPage.browseEvents')}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={() => setViewMode('grid')} aria-label="Grid view">

@@ -17,15 +17,17 @@ import { PollDisplay } from '../PollDisplay';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { useTheme } from '../../context/ThemeContext';
 import { logger } from '../../utils/logger';
+import { useTranslation } from 'react-i18next';
 
 
 function MessageWall() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [event, setEvent] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeUsers, setActiveUsers] = useState(0);
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, loading, checkLoggedIn } = useAuth();
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -54,6 +56,7 @@ function MessageWall() {
     logger.log('MessageWall component mounted');
     fetchEvent();
     fetchMessages();
+    checkLoggedIn(); // Re-check the logged-in state when component mounts
   
     logger.log('Emitting join event for:', id);
     socket.emit('join event', id);
@@ -213,18 +216,20 @@ function MessageWall() {
       try {
         await navigator.share({
           title: event.name,
-          text: `Join the event: ${event.name}`,
+          text: t('messageWall.joinEvent'),
           url: window.location.href,
         });
       } catch (error) {
         console.error('Error sharing:', error);
+        showErrorToast(t('messageWall.shareError'));
       }
     } else {
       const shareUrl = window.location.href;
       navigator.clipboard.writeText(shareUrl).then(() => {
-        alert('Event link copied to clipboard!');
+        showSuccessToast(t('messageWall.linkCopied'));
       }, (err) => {
         console.error('Could not copy text: ', err);
+        showErrorToast(t('messageWall.shareError'));
       });
     }
   };
@@ -330,6 +335,10 @@ function MessageWall() {
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Layout>
       <div className={`flex flex-col h-full bg-background ${spectateMode ? 'fixed inset-0 z-50 spectate-mode' : ''}`}>
@@ -389,18 +398,18 @@ function MessageWall() {
               </div>
               <div className="flex items-center">
                 <UsersIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                <span>{activeUsers} active</span>
+                <span>{t('messageWall.activeUsers', { count: activeUsers })}</span>
               </div>
               {event.requiresApproval && (
                 <div className="flex items-center text-primary">
                   <ShieldIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                  <span>Moderated</span>
+                  <span>{t('messageWall.moderated')}</span>
                 </div>
               )}
               {cooldown > 0 && (
                 <div className="flex items-center text-primary">
                   <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                  <span>{cooldown}s</span>
+                  <span>{t('messageWall.cooldown', { seconds: cooldown })}</span>
                 </div>
               )}
             </div>
@@ -440,7 +449,7 @@ function MessageWall() {
                 >
                   <Message 
                     message={message}
-                    canDelete={canPerformAdminActions || (user && user._id === message.user._id)}
+                    canDelete={canPerformAdminActions}
                     onDelete={() => deleteMessage(message._id)}
                     onReply={handleReply}
                     event={event}
@@ -468,7 +477,7 @@ function MessageWall() {
                   className="rounded-full shadow-lg"
                   onClick={() => scrollToBottom()}
                 >
-                  New messages
+                  {t('messageWall.newMessages')}
                 </Button>
               </motion.div>
             )}
@@ -515,6 +524,16 @@ function MessageWall() {
         eventId={id}
         isOrganizer={canPerformAdminActions}
       />
+      {event && event.endTime < new Date() && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+          {t('messageWall.eventEnded')}
+        </div>
+      )}
+      {event && event.startTime > new Date() && (
+        <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4">
+          {t('messageWall.eventNotStarted')}
+        </div>
+      )}
     </Layout>
   );
 }

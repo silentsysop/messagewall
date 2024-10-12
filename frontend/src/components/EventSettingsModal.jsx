@@ -11,8 +11,10 @@ import { format } from 'date-fns';
 import { PollPresetManager } from './PollPresetManager';
 import { PollHistory } from './PollHistory';
 import config from '../config';
+import { useTranslation } from 'react-i18next';
 
 export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatLocked, onToggleChatLock }) {
+  const { t } = useTranslation();
   const [name, setName] = useState(event.name);
   const [description, setDescription] = useState(event.description);
   const [requiresApproval, setRequiresApproval] = useState(event.requiresApproval);
@@ -64,27 +66,27 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
         });
       }
 
-      showSuccessToast('Event updated successfully');
+      showSuccessToast(t('eventSettings.successSaving'));
       onUpdate(response.data);
       onClose();
     } catch (error) {
       console.error('Error updating event:', error);
-      showErrorToast('Failed to update event: ' + (error.response?.data?.details || error.message));
+      showErrorToast(t('eventSettings.errorSaving'));
     }
   };
 
   const handleDeleteEvent = async () => {
     showConfirmToast(
-      'Are you sure you want to delete this event? This action cannot be undone.',
+      t('eventSettings.confirmDelete'),
       async () => {
         try {
           await api.delete(`/events/${event._id}`);
-          showSuccessToast('Event deleted successfully');
+          showSuccessToast(t('eventSettings.successDeleting'));
           onDelete();
           onClose();
         } catch (error) {
           console.error('Error deleting event:', error);
-          showErrorToast('Failed to delete event: ' + (error.response?.data?.details || error.message));
+          showErrorToast(t('eventSettings.errorDeleting'));
         }
       }
     );
@@ -94,21 +96,21 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
     <div className="fixed inset-y-0 right-0 bg-background border-l border-border w-full max-w-md overflow-y-auto shadow-lg z-50">
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Event Settings</h2>
+          <h2 className="text-2xl font-bold text-foreground">{t('eventSettings.title')}</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-6 w-6" />
           </Button>
         </div>
         <Tabs defaultValue="general">
           <TabsList className="mb-4">
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="polls">Polls</TabsTrigger>
-            <TabsTrigger value="history">Poll History</TabsTrigger>
+            <TabsTrigger value="general">{t('eventSettings.general')}</TabsTrigger>
+            <TabsTrigger value="polls">{t('eventSettings.polls')}</TabsTrigger>
+            <TabsTrigger value="history">{t('eventSettings.history')}</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name" className="text-sm sm:text-base">Event Name</Label>
+                <Label htmlFor="name" className="text-sm sm:text-base">{t('eventSettings.eventName')}</Label>
                 <Input
                   id="name"
                   value={name}
@@ -213,12 +215,12 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
                   className="w-full flex items-center justify-center"
                 >
                   {isChatLocked ? <Unlock className="mr-2" /> : <Lock className="mr-2" />}
-                  {isChatLocked ? 'Unlock Chat' : 'Lock Chat'}
+                  {isChatLocked ? t('eventSettings.unlockChat') : t('eventSettings.lockChat')}
                 </Button>
               </div>
               <Button type="submit" className="w-full">
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+                {t('eventSettings.saveChanges')}
               </Button>
             </form>
           </TabsContent>
@@ -232,7 +234,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
         <div className="mt-6 pt-4 border-t border-border">
           <Button onClick={handleDeleteEvent} variant="destructive" className="w-full">
             <Trash2 className="w-4 h-4 mr-2" />
-            Delete Event
+            {t('eventSettings.deleteEvent')}
           </Button>
         </div>
       </div>

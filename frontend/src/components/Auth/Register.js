@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../ui/card";
 import { Label } from "../ui/label";
+import { useTranslation } from 'react-i18next';
 
 function Register() {
   const [email, setEmail] = useState('');
@@ -13,15 +14,16 @@ function Register() {
   const [username, setUsername] = useState('');
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await register(email, password, username);
-      showSuccessToast('Registered successfully');
+      showSuccessToast(t('auth.registerSuccess'));
       navigate('/');
     } catch (error) {
-      showErrorToast(error.response?.data?.error || 'An error occurred during registration');
+      showErrorToast(error.response?.data?.error || t('auth.registerError'));
     }
   };
 
@@ -29,51 +31,51 @@ function Register() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Register</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <CardTitle>{t('auth.register')}</CardTitle>
+          <CardDescription>{t('auth.registerDescription')}</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
+                placeholder={t('auth.emailPlaceholder')}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t('auth.username')}</Label>
               <Input
                 id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
+                placeholder={t('auth.usernamePlaceholder')}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.password')}</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
+                placeholder={t('auth.passwordPlaceholder')}
                 required
               />
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
-            <Button type="submit" className="w-full">Register</Button>
+            <Button type="submit" className="w-full">{t('auth.registerButton')}</Button>
             <p className="text-sm text-center text-muted-foreground">
-              Already have an account?{' '}
+              {t('auth.alreadyHaveAccount')}{' '}
               <Link to="/login" className="text-primary hover:underline">
-                Login here
+                {t('auth.loginHere')}
               </Link>
             </p>
           </CardFooter>

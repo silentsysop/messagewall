@@ -4,8 +4,11 @@ import { Trash2, ReplyIcon, ThumbsUp, ThumbsDown } from 'lucide-react'; // Impor
 import api from '../../services/api';
 import { toast } from 'react-hot-toast'; // Import toast
 import { logger } from '../../utils/logger'
+import { useTranslation } from 'react-i18next';
+import { showConfirmToast, showErrorToast, showSuccessToast } from '../../utils/toast';
 
 function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
+  const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
   const [animate, setAnimate] = useState(false);
   const [userReaction, setUserReaction] = useState(message.userReaction); // Track user's reaction locally
@@ -126,6 +129,28 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
     }
   };
 
+  const handleDelete = () => {
+    showConfirmToast(
+      t('message.confirmDelete'),
+      async () => {
+        try {
+          await onDelete();
+          showSuccessToast(t('message.messageDeleted'));
+        } catch (error) {
+          showErrorToast(t('message.errorDeleting'));
+        }
+      }
+    );
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content).then(() => {
+      showSuccessToast(t('message.messageCopied'));
+    }, (err) => {
+      console.error('Could not copy text: ', err);
+    });
+  };
+
   return (
     <div 
       className={`message ${animate ? 'animate' : ''} ${canDelete ? 'can-delete' : ''}`} 
@@ -161,7 +186,7 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
                 className="delete-button" 
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete();
+                  handleDelete();
                 }}
               >
                 <Trash2 size={14} />

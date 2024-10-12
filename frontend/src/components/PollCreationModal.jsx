@@ -6,8 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { X, Plus, Minus } from 'lucide-react';
 import api from '../services/api';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
+import { useTranslation } from 'react-i18next';
 
 export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
+  const { t } = useTranslation();
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [duration, setDuration] = useState(60);
@@ -76,19 +78,19 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isOrganizer) {
-      showErrorToast('You do not have permission to create polls');
+      showErrorToast(t('pollCreation.errorCreating'));
       return;
     }
     if (isActivePoll) {
-      showErrorToast('There is already an active poll. Please wait for it to end before creating a new one.');
+      showErrorToast(t('pollCreation.pollInProgress'));
       return;
     }
     try {
       await api.post(`/polls/${eventId}`, { question, options, duration });
-      showSuccessToast('Poll created successfully');
+      showSuccessToast(t('pollCreation.successCreating'));
       onClose();
     } catch (error) {
-      showErrorToast('Failed to create poll: ' + (error.response?.data?.details || error.message));
+      showErrorToast(t('pollCreation.errorCreating'));
     }
   };
 
@@ -98,20 +100,20 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-background border border-border rounded-lg p-8 max-w-md w-full shadow-lg">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Create Poll</h2>
+          <h2 className="text-2xl font-bold text-foreground">{t('pollCreation.createPoll')}</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-6 w-6" />
           </Button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="preset">Use Preset</Label>
+            <Label htmlFor="preset">{t('pollCreation.usePreset')}</Label>
             <Select onValueChange={handlePresetChange} value={selectedPresetId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a preset" />
+                <SelectValue placeholder={t('pollCreation.selectPreset')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="none">{t('pollCreation.none')}</SelectItem>
                 {presets.map(preset => (
                   <SelectItem key={preset._id} value={preset._id}>{preset.question}</SelectItem>
                 ))}
@@ -119,7 +121,7 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
             </Select>
           </div>
           <div>
-            <Label htmlFor="question">Question</Label>
+            <Label htmlFor="question">{t('pollCreation.question')}</Label>
             <Input
               id="question"
               value={question}
@@ -132,7 +134,7 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
               <Input
                 value={option}
                 onChange={(e) => handleOptionChange(index, e.target.value)}
-                placeholder={`Option ${index + 1}`}
+                placeholder={`${t('pollCreation.option')} ${index + 1}`}
                 required
               />
               {index > 1 && (
@@ -145,11 +147,11 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
           {options.length < 5 && (
             <Button type="button" variant="outline" onClick={handleAddOption}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Option
+              {t('pollCreation.addOption')}
             </Button>
           )}
           <div>
-            <Label htmlFor="duration">Duration (seconds)</Label>
+            <Label htmlFor="duration">{t('pollCreation.duration')}</Label>
             <Input
               id="duration"
               type="number"
@@ -161,7 +163,7 @@ export function PollCreationModal({ isOpen, onClose, eventId, isOrganizer }) {
             />
           </div>
           <Button type="submit" className="w-full" disabled={isActivePoll}>
-            {isActivePoll ? 'Poll in Progress' : 'Create Poll'}
+            {isActivePoll ? t('pollCreation.pollInProgress') : t('pollCreation.create')}
           </Button>
         </form>
       </div>
