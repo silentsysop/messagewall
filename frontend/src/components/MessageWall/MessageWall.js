@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import socket from '../../services/socket';
@@ -52,6 +52,17 @@ function MessageWall() {
     messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
   };
 
+  const fetchEvent = useCallback(async () => {
+    try {
+      const response = await api.get(`/events/${id}`);
+      setEvent(response.data);
+      setIsChatLocked(response.data.isChatLocked);
+      setCooldown(response.data.cooldownEnabled ? response.data.cooldown : 0);
+      console.log('Fetched event:', response.data);
+    } catch (error) {
+      console.error('Error fetching event:', error);
+    }
+  }, [id]);
 
   useEffect(() => {
     logger.log('MessageWall component mounted');
@@ -64,12 +75,29 @@ function MessageWall() {
   
     socket.on('new message', (newMessage) => {
       logger.log('Received new message:', newMessage);
-      setMessages(prevMessages => [...prevMessages, newMessage]);
+      setMessages(prevMessages => {
+        // Check if the message already exists
+        const existingMessageIndex = prevMessages.findIndex(msg => msg._id === newMessage._id);
+        if (existingMessageIndex !== -1) {
+          // If it exists, update it
+          const updatedMessages = [...prevMessages];
+          updatedMessages[existingMessageIndex] = newMessage;
+          return updatedMessages;
+        } else {
+          // If it doesn't exist, add it
+          return [...prevMessages, newMessage];
+        }
+      });
       if (!isScrolled) {
         scrollToBottom();
       }
     });
 
+    socket.on('event updated', (updatedEventId) => {
+      if (updatedEventId === id) {
+        fetchEvent();
+      }
+    });
 
     socket.on('reaction updated', ({ messageId, reactions }) => {
       setMessages(prevMessages => prevMessages.map(msg => 
@@ -101,8 +129,15 @@ function MessageWall() {
       setActivePoll(prev => prev && prev._id === deletedPollId ? null : prev);
     });
   
-    socket.on('approval status changed', ({ requiresApproval }) => {
-      setEvent(prevEvent => ({ ...prevEvent, requiresApproval }));
+    socket.on('approval status changed', ({ eventId, requiresApproval }) => {
+      if (eventId === id) {
+        setEvent(prevEvent => ({ ...prevEvent, requiresApproval }));
+        // Update all messages to reflect the new approval status
+        setMessages(prevMessages => prevMessages.map(msg => ({
+          ...msg,
+          approved: requiresApproval ? msg.approved : true
+        })));
+      }
     });
   
     socket.on('message deleted', (deletedMessageId) => {
@@ -135,10 +170,11 @@ function MessageWall() {
       socket.off('message deleted'); 
       socket.off('chat lock changed');
       socket.off('user role updated');
+      socket.off('event updated');
       logger.log('Emitting leave event for:', id);
       socket.emit('leave event', id);
     };
-  }, [id, isScrolled]);
+  }, [id, isScrolled, fetchEvent]);
 
   useEffect(() => {
     if (isInitialLoad && messages.length > 0) {
@@ -188,18 +224,6 @@ function MessageWall() {
 
     fetchActivePoll();
   }, [id]);
-
-  const fetchEvent = async () => {
-    try {
-      const response = await api.get(`/events/${id}`);
-      setEvent(response.data);
-      setIsChatLocked(response.data.isChatLocked);
-      setCooldown(response.data.cooldownEnabled ? response.data.cooldown : 0);
-      console.log('Fetched event:', response.data);
-    } catch (error) {
-      console.error('Error fetching event:', error);
-    }
-  };
 
   const fetchMessages = async () => {
     try {
@@ -302,7 +326,7 @@ function MessageWall() {
   const handleVote = async (pollId, optionIndex) => {
     try {
       const response = await api.post(`/polls/${pollId}/vote`, { optionIndex });
-      setActivePoll(response.data);  // Update the poll state instead of setting it to null
+      setActivePoll(response.data);
     } catch (error) {
       console.error('Error voting on poll:', error);
       showErrorToast('Failed to submit vote');
@@ -470,7 +494,7 @@ function MessageWall() {
                     onDelete={() => deleteMessage(message._id)}
                     onReply={handleReply}
                     event={event}
-                    isAdmin={user && user.role === 'organizer'}
+                    isAdmin={canPerformAdminActions}
                   />
                 </motion.div>
               ))}

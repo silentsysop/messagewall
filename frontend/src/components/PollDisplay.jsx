@@ -63,12 +63,15 @@ export function PollDisplay({ poll, onVote, isOrganizer }) {
     };
   }, []);
 
-  const handleVote = async (optionIndex) => {
-    if (hasVoted) return;
+  const handleVote = async () => {
+    if (hasVoted || selectedOption === null) return;
     try {
-      await onVote(poll._id, optionIndex);
+      const response = await api.post(`/polls/${poll._id}/vote`, { optionIndex: selectedOption });
+      console.log(response.data);
+      setHasVoted(true);
       showSuccessToast(t('pollDisplay.successVoting'));
     } catch (error) {
+      console.error('Error voting on poll:', error);
       showErrorToast(t('pollDisplay.errorVoting'));
     }
   };

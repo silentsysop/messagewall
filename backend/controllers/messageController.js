@@ -83,20 +83,15 @@ exports.approveMessage = async (req, res) => {
   const io = req.app.locals.io;
 
   try {
-    const message = await Message.findById(req.params.id)
-      .populate('user', 'username')
-      .populate({
-        path: 'replyTo',
-        populate: { path: 'user', select: 'username' }
-      });
+    const message = await Message.findById(req.params.id);
 
     if (!message) {
       return res.status(404).json({ msg: 'Message not found' });
     }
 
-    const event = await Event.findById(message.event);
-    if (event.organizer.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'User not authorized' });
+    // Check if the user has the 'organizer' role
+    if (req.user.role !== 'organizer') {
+      return res.status(403).json({ msg: 'User not authorized. Only organizers can approve messages.' });
     }
 
     message.approved = true;
@@ -104,14 +99,16 @@ exports.approveMessage = async (req, res) => {
 
     // Populate the message before emitting
     const populatedMessage = await Message.findById(message._id)
-      .populate('user', 'username')
+      .populate('user', 'username role customRole')
+      .populate('event', 'name')
       .populate({
         path: 'replyTo',
+        select: 'content user name',
         populate: { path: 'user', select: 'username' }
       });
 
     io.to(message.event.toString()).emit('new message', populatedMessage);
-    io.emit('message approved', message._id);
+    io.emit('message approved', populatedMessage._id);
 
     res.json(populatedMessage);
   } catch (error) {
@@ -128,8 +125,8 @@ exports.deleteMessage = async (req, res) => {
       return res.status(404).json({ msg: 'Message not found' });
     }
 
-    const event = await Event.findById(message.event);
-    if (event.organizer.toString() !== req.user.id && message.user.toString() !== req.user.id) {
+    // Check if the user is an organizer or the message creator
+    if (req.user.role !== 'organizer' && message.user.toString() !== req.user.id) {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 

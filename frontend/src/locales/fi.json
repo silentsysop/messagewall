@@ -117,6 +117,7 @@
       "general": "Yleiset",
       "polls": "Kyselyt",
       "history": "Historia",
+      "moderation": "Moderointi",
       "eventName": "Tapahtuman nimi",
       "description": "Kuvaus",
       "startTime": "Alkamisaika",
@@ -155,6 +156,7 @@
       "option": "Vaihtoehto"
     },
     "pollDisplay": {
+      "currentPoll": "Nykyinen Äänestys",
       "vote": "Äänestä",
       "voted": "Äänestetty",
       "ended": "Päättynyt",
@@ -179,6 +181,10 @@
     "moderation": {
       "title": "Viestien moderointi",
       "noPendingMessages": "Ei odottavia viestejä",
+      "messageApproved": "Viesti hyväksytty onnistuneesti",
+      "messageDeleted": "Viesti poistettu onnistuneesti",
+      "errorApproving": "Virhe viestin hyväksymisessä",
+      "errorDeleting": "Virhe viestin poistamisessa",
       "approve": "Hyväksy",
       "delete": "Poista",
       "by": "Lähettäjä: {{user}}",

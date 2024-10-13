@@ -15,6 +15,8 @@ export default function Layout({ children }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const showAuthLinks = process.env.REACT_APP_SHOW_AUTH_LINKS === '' || 'true';
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -104,14 +106,18 @@ export default function Layout({ children }) {
             </>
           ) : (
             <>
-              <Link to="/login" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
-                <LogInIcon className="h-5 w-5" />
-                <span className="hidden md:inline">{t('common.login')}</span>
-              </Link>
-              <Link to="/register" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
-                <UserPlusIcon className="h-5 w-5" />
-                <span className="hidden md:inline">{t('common.register')}</span>
-              </Link>
+              {showAuthLinks && (
+                <>
+                  <Link to="/login" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
+                  <LogInIcon className="h-5 w-5" />
+                    <span>{t('common.login')}</span>
+                  </Link>
+                  <Link to="/register" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
+                  <UserPlusIcon className="h-5 w-5" />
+                    <span>{t('common.register')}</span>
+                  </Link>
+                </>
+              )}
             </>
           )}
           <ThemeToggle />

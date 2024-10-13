@@ -117,6 +117,7 @@
       "general": "General",
       "polls": "Polls",
       "history": "History",
+      "moderation": "Moderation",
       "eventName": "Event Name",
       "description": "Description",
       "startTime": "Start Time",
@@ -155,6 +156,7 @@
       "option": "Option"
     },
     "pollDisplay": {
+      "currentPoll": "Current Poll",
       "vote": "Vote",
       "voted": "Voted",
       "ended": "Ended",
@@ -179,10 +181,13 @@
     "moderation": {
       "title": "Message Moderation",
       "noPendingMessages": "No pending messages",
-      "approve": "Approve",
-      "delete": "Delete",
+      "messageApproved": "Message approved successfully",
+      "messageDeleted": "Message deleted successfully",
+      "errorApproving": "Error approving message",
+      "errorDeleting": "Error deleting message",
       "by": "By: {{user}}",
-      "createdAt": "Created at: {{date}}"
+      "approve": "Approve",
+      "delete": "Delete"
     },
     "timeUnits": {
       "aboutXHours": "about {{count}} hour",

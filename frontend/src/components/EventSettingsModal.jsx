@@ -10,8 +10,10 @@ import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toa
 import { format } from 'date-fns';
 import { PollPresetManager } from './PollPresetManager';
 import { PollHistory } from './PollHistory';
+import { ModerationTab } from './ModerationTab';
 import config from '../config';
 import { useTranslation } from 'react-i18next';
+import socket from '../services/socket'; // Make sure to import the socket
 
 export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatLocked, onToggleChatLock }) {
   const { t } = useTranslation();
@@ -67,7 +69,10 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
       }
 
       showSuccessToast(t('eventSettings.successSaving'));
-      onUpdate(response.data);
+
+      // Emit a socket event to notify all clients (including the current one) about the event update
+      socket.emit('event updated', event._id);
+
       onClose();
     } catch (error) {
       console.error('Error updating event:', error);
@@ -106,6 +111,7 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
             <TabsTrigger value="general">{t('eventSettings.general')}</TabsTrigger>
             <TabsTrigger value="polls">{t('eventSettings.polls')}</TabsTrigger>
             <TabsTrigger value="history">{t('eventSettings.history')}</TabsTrigger>
+            <TabsTrigger value="moderation">{t('eventSettings.moderation')}</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -229,6 +235,9 @@ export function EventSettingsModal({ event, onClose, onUpdate, onDelete, isChatL
           </TabsContent>
           <TabsContent value="history">
             <PollHistory eventId={event._id} />
+          </TabsContent>
+          <TabsContent value="moderation">
+            <ModerationTab eventId={event._id} />
           </TabsContent>
         </Tabs>
         <div className="mt-6 pt-4 border-t border-border">

@@ -78,6 +78,7 @@ exports.updateEvent = async (req, res) => {
       event.requiresApproval = req.body.requiresApproval;
       // Emit socket event for approval status change
       req.app.locals.io.to(event._id.toString()).emit('approval status changed', {
+        eventId: event._id,
         requiresApproval: event.requiresApproval
       });
     }

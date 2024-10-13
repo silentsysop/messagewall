@@ -6,6 +6,7 @@ const upload = require('../middleware/upload');
 const path = require('path');
 const fs = require('fs').promises;
 const Event = require('../models/Event'); // Add this line
+const Message = require('../models/Message'); // Add this line
 
 const router = express.Router();
 
@@ -67,5 +68,17 @@ router.get('/:id/poll-history', [auth, checkRole('organizer')], getPollHistory);
 router.delete('/:id/poll-history', [auth, checkRole('organizer')], clearPollHistory);
 
 router.put('/:id/toggle-chat-lock', [auth, checkRole('organizer')], toggleChatLock);
+
+router.get('/:id/pending-messages', auth, checkRole('organizer'), async (req, res) => {
+  try {
+    const pendingMessages = await Message.find({ event: req.params.id, approved: false })
+      .populate('user', 'username')
+      .sort({ createdAt: -1 });
+    res.json(pendingMessages);
+  } catch (error) {
+    console.error('Error fetching pending messages:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 module.exports = router;
