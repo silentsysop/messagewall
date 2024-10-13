@@ -13,7 +13,8 @@
       "savedEvents": "Tallennetut tapahtumat",
       "loading": "Ladataan...",
       "viewEvent": "Näytä tapahtuma",
-      "unknownOrganizer": "Tuntematon järjestäjä"
+      "unknownOrganizer": "Tuntematon järjestäjä",
+      "adminActions": "Ylläpitäjän toiminnot"
     },
     "mainPage": {
       "upcomingEvents": "Tulevat tapahtumat",
@@ -134,7 +135,8 @@
       "successDeleting": "Tapahtuma poistettu onnistuneesti",
       "errorDeleting": "Virhe tapahtuman poistamisessa",
       "enableApproval": "Ota hyväksyntä käyttöön",
-      "disableApproval": "Poista hyväksyntä käytöstä"
+      "disableApproval": "Poista hyväksyntä käytöstä",
+      "roles": "Mukautetut roolit"
     },
     "pollCreation": {
       "createPoll": "Luo kysely",
@@ -187,5 +189,27 @@
       "aboutXHours_plural": "noin {{count}} tuntia",
       "xDays": "{{count}} päivän",
       "xDays_plural": "{{count}} päivää"
+    },
+    "customRole": {
+      "title": "Mukautettujen roolien hallinta",
+      "organizerList": "Järjestäjälista",
+      "assignRole": "Määritä mukautettu rooli",
+      "roleName": "Roolin nimi",
+      "roleNamePlaceholder": "Syötä mukautetun roolin nimi",
+      "roleColor": "Roolin väri",
+      "assignButton": "Määritä rooli",
+      "errorFetchingOrganizers": "Virhe haettaessa järjestäjiä",
+      "selectUserAndRole": "Valitse käyttäjä ja syötä roolin nimi",
+      "roleAssigned": "Mukautettu rooli määritetty onnistuneesti",
+      "errorAssigningRole": "Virhe määritettäessä mukautettua roolia",
+      "removeButton": "Poista rooli",
+      "roleRemoved": "Mukautettu rooli poistettu onnistuneesti",
+      "errorRemovingRole": "Virhe poistettaessa mukautettua roolia",
+      "selectUser": "Valitse käyttäjä"
+    },
+    "adminActions": {
+      "title": "Ylläpitäjän toiminnot",
+      "moderate": "Moderoi viestejä",
+      "customRoles": "Mukautettujen roolien hallinta"
     }
   }

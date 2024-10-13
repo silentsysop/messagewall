@@ -83,6 +83,7 @@
     
 }
 
+
 .message-time {
     @apply text-muted-foreground text-sm opacity-80 whitespace-nowrap flex-shrink-0 mr-2;
 }
@@ -352,6 +353,10 @@
 
 .organizer-badge {
     @apply bg-blue-600 text-white;
+}
+
+.custom-role-badge {
+    @apply text-white;
 }
 
 .poll-container {

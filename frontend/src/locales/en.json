@@ -13,7 +13,8 @@
       "savedEvents": "Saved Events",
       "loading": "Loading...",
       "viewEvent": "View event",
-      "unknownOrganizer": "Unknown Organizer"
+      "unknownOrganizer": "Unknown Organizer",
+      "adminActions": "Admin Actions"
     },
     "mainPage": {
       "upcomingEvents": "Upcoming Events",
@@ -134,7 +135,8 @@
       "successDeleting": "Event deleted successfully",
       "errorDeleting": "Error deleting event",
       "enableApproval": "Enable Approval",
-      "disableApproval": "Disable Approval"
+      "disableApproval": "Disable Approval",
+      "roles": "Custom Roles"
     },
     "pollCreation": {
       "createPoll": "Create Poll",
@@ -187,5 +189,27 @@
       "aboutXHours_plural": "about {{count}} hours",
       "xDays": "{{count}} day",
       "xDays_plural": "{{count}} days"
+    },
+    "customRole": {
+      "title": "Custom Role Management",
+      "organizerList": "Organizer List",
+      "assignRole": "Assign Custom Role",
+      "roleName": "Role Name",
+      "roleNamePlaceholder": "Enter custom role name",
+      "roleColor": "Role Color",
+      "assignButton": "Assign Role",
+      "errorFetchingOrganizers": "Error fetching organizers",
+      "selectUserAndRole": "Please select a user and enter a role name",
+      "roleAssigned": "Custom role assigned successfully",
+      "errorAssigningRole": "Error assigning custom role",
+      "removeButton": "Remove Role",
+      "roleRemoved": "Custom role removed successfully",
+      "errorRemovingRole": "Error removing custom role",
+      "selectUser": "Please select a user"
+    },
+    "adminActions": {
+      "title": "Admin Actions",
+      "moderate": "Moderate Messages",
+      "customRoles": "Custom Role Management"
     }
   }

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "./ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar"
-import { SearchIcon, BellIcon, CalendarIcon, LogInIcon, UserPlusIcon, ShieldIcon, LogOutIcon, HeartIcon } from 'lucide-react';
+import { SearchIcon, BellIcon, CalendarIcon, LogInIcon, UserPlusIcon, ShieldIcon, LogOutIcon, HeartIcon, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from './ui/ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -13,6 +13,7 @@ export default function Layout({ children }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const menuRef = useRef(null);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -29,6 +30,11 @@ export default function Layout({ children }) {
 
   const handleLogout = () => {
     logout();
+    setShowUserMenu(false);
+  };
+
+  const handleAdminActions = () => {
+    navigate('/admin-actions');
     setShowUserMenu(false);
   };
 
@@ -76,6 +82,15 @@ export default function Layout({ children }) {
                 </Avatar>
                 {showUserMenu && (
                   <div className="absolute right-0 mt-2 w-48 bg-background border border-muted rounded-md shadow-lg py-1 z-10">
+                    {user && user.role === 'organizer' && (
+                      <button
+                        onClick={handleAdminActions}
+                        className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
+                      >
+                        <Settings className="h-4 w-4 mr-2" />
+                        {t('common.adminActions')}
+                      </button>
+                    )}
                     <button
                       onClick={handleLogout}
                       className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"

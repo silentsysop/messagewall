@@ -113,6 +113,14 @@ function MessageWall() {
       setIsChatLocked(lockStatus);
     });
   
+    socket.on('user role updated', ({ userId, customRole }) => {
+      setMessages(prevMessages => prevMessages.map(message => 
+        message && message.user && message.user._id === userId 
+          ? { ...message, user: { ...message.user, customRole } }
+          : message
+      ));
+    });
+  
     return () => {
       logger.log('MessageWall component unmounting');
       socket.off('new message');
@@ -126,6 +134,7 @@ function MessageWall() {
       socket.off('approval status changed');
       socket.off('message deleted'); 
       socket.off('chat lock changed');
+      socket.off('user role updated');
       logger.log('Emitting leave event for:', id);
       socket.emit('leave event', id);
     };
@@ -448,7 +457,7 @@ function MessageWall() {
               </div>
             )}
             <div className="px-4">
-              {messages.map((message, index) => (
+              {messages.filter(message => message && message._id).map((message, index) => (
                 <motion.div
                   key={message._id}
                   initial={{ opacity: 0, y: 20 }}

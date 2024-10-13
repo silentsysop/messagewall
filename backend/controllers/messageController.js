@@ -1,6 +1,7 @@
 const Message = require('../models/Message');
 const Event = require('../models/Event');
 const MAX_MESSAGE_LENGTH = 255; // Add this at the top of the file
+const User = require('../models/User');
 
 
 exports.createMessage = async (req, res) => {
@@ -23,19 +24,22 @@ exports.createMessage = async (req, res) => {
       return res.status(400).json({ error: `Message content must be between 1 and ${MAX_MESSAGE_LENGTH} characters.` });
     }
 
+    const user = req.user ? await User.findById(req.user.id) : null;
+    
     const newMessage = new Message({
       content,
       event: eventId,
-      user: req.user ? req.user.id : null,
-      name: req.user ? req.user.username : (name || 'Anonymous'),
+      user: user ? user._id : null,
+      name: user ? user.username : (name || 'Anonymous'),
       approved: event.requiresApproval ? false : true,
-      replyTo: replyTo || null
+      replyTo: replyTo || null,
+      customRole: user ? user.customRole : null
     });
 
     const savedMessage = await newMessage.save();
     
     const populatedMessage = await Message.findById(savedMessage._id)
-      .populate('user', 'username role')
+      .populate('user', 'username role customRole')
       .populate('event', 'name')
       .populate({
         path: 'replyTo',
@@ -61,11 +65,11 @@ exports.createMessage = async (req, res) => {
 exports.getMessages = async (req, res) => {
   try {
     const messages = await Message.find({ event: req.params.eventId, approved: true })
-      .populate('user', 'username role')
+      .populate('user', 'username role customRole')
       .populate({
         path: 'replyTo',
         select: 'content user name',
-        populate: { path: 'user', select: 'username' }
+        populate: { path: 'user', select: 'username customRole' }
       })
       .sort({ createdAt: 1 });
     res.json(messages);

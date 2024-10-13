@@ -78,6 +78,27 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
     return message.name || 'Anonymous';
   };
 
+  const renderRoleBadge = () => {
+    if (message.customRole) {
+      return (
+        <span 
+          className="badge custom-role-badge"
+          style={{ 
+            backgroundColor: message.customRole.color,
+            color: '#ffffff', // Default to white text
+          }}
+        >
+          {message.customRole.name}
+        </span>
+      );
+    } else if (isEventCreator) {
+      return <span className="badge event-creator-badge">Organizer</span>;
+    } else if (isOrganizer) {
+      return <span className="badge organizer-badge">Admin</span>;
+    }
+    return null;
+  };
+
   const handleReact = async (reaction) => {
     if (isProcessing) return; // Prevent multiple clicks
 
@@ -165,9 +186,8 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
         )}
         <div className="message-header">
           <div className="message-info">
-            <span className={`message-author ${isEventCreator ? 'event-creator' : isAdmin ? 'admin' : ''}`}>
-              {isEventCreator && <span className="badge event-creator-badge">Organizer</span>}
-              {!isEventCreator && isOrganizer && <span className="badge organizer-badge">Admin</span>}
+            <span className={`message-author ${isEventCreator ? 'event-creator' : isOrganizer ? 'admin' : ''}`}>
+              {renderRoleBadge()}
               {getDisplayName()}
             </span>
             <span className="message-time">
