@@ -29,6 +29,8 @@ MessageWall is a real-time event messaging platform that allows event organizers
 - 🔄 Automatic removal of ended events
 - 🔒 Chat locking functionality
 - 📊 Poll history, presets and management
+- 🌐 Localization with English and Finnish languages
+- 👑 Custom role management for organizers
 
 ## 🚀 Coming Soon
 - 🔔 Push notification system
@@ -47,6 +49,7 @@ MessageWall is a real-time event messaging platform that allows event organizers
 - 🖼️ Lucide React for icons
 - 🎭 Framer Motion for animations
 - 🍞 React Hot Toast for notifications
+- 🌐 i18next for localization
 
 ### Backend
 - 🟢 Node.js
@@ -67,6 +70,10 @@ To give yourself organizer/admin privileges:
 1.   Access your MongoDB database
 2.   Find the user document you created in the project
 3.   Find your created account and change the role field to "organizer"
+
+### Optional frontend `.env` variables
+#### REACT_APP_SHOW_AUTH_LINKS=false
+- Hide login and register icons
 
 
 ### Installation (development)
