@@ -33,7 +33,11 @@ const MessageSchema = new mongoose.Schema({
   userReactions: [{
     userId: { type: String, required: true },
     reaction: { type: String, enum: ['thumbsUp', 'thumbDown'], required: true }
-  }]
+  }],
+  customRole: {
+    name: String,
+    color: String
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Message', MessageSchema);

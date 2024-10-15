@@ -10,8 +10,10 @@ import api from '../services/api';
 import Layout from './HUDlayout';
 import { format } from 'date-fns';
 import config from '../config';
+import { useTranslation } from 'react-i18next';
 
 export default function PastEvents() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
@@ -73,7 +75,7 @@ export default function PastEvents() {
   const renderEventCard = (event) => (
     <Card key={event._id} className={`group relative rounded-lg shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl ${viewMode === 'list' ? 'flex' : ''}`}>
       <Link to={`/event/${event._id}`} className="absolute inset-0 z-10">
-        <span className="sr-only">View event</span>
+        <span className="sr-only">{t('common.viewEvent')}</span>
       </Link>
       <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
         <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
@@ -97,7 +99,7 @@ export default function PastEvents() {
                 </AvatarFallback>
               </Avatar>
               <span className="text-sm font-medium">
-                {event.organizer && event.organizer.username ? event.organizer.username : 'Unknown Organizer'}
+                {event.organizer && event.organizer.username ? event.organizer.username : t('common.unknownOrganizer')}
               </span>
             </div>
             {user && user.role === 'organizer' && (
@@ -125,7 +127,7 @@ export default function PastEvents() {
                       className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
-                      {event.requiresApproval ? 'Disable' : 'Enable'} Approval
+                      {event.requiresApproval ? t('eventSettings.disableApproval') : t('eventSettings.enableApproval')}
                     </button>
                     <button 
                       onClick={(e) => {
@@ -136,7 +138,7 @@ export default function PastEvents() {
                       className="flex items-center w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
                     >
                       <Trash className="h-4 w-4 mr-2" />
-                      Delete Event
+                      {t('eventSettings.deleteEvent')}
                     </button>
                   </div>
                 )}
@@ -153,20 +155,20 @@ export default function PastEvents() {
       <div className="container mx-auto py-8 px-4 md:px-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Past Events</h1>
-            <p className="text-muted-foreground">Browse events that have already taken place.</p>
+            <h1 className="text-2xl font-bold">{t('pastEvents.title')}</h1>
+            <p className="text-muted-foreground">{t('pastEvents.description')}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setViewMode('grid')} aria-label="Grid view">
+            <Button variant="ghost" size="icon" onClick={() => setViewMode('grid')} aria-label={t('mainPage.gridView')}>
               <LayoutGrid className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => setViewMode('list')} aria-label="List view">
+            <Button variant="ghost" size="icon" onClick={() => setViewMode('list')} aria-label={t('mainPage.listView')}>
               <List className="h-5 w-5" />
             </Button>
           </div>
         </div>
         <div className={viewMode === 'grid' ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-4'}>
-          {events.map(renderEventCard)}
+          {events.length > 0 ? events.map(renderEventCard) : <p>{t('pastEvents.noPastEvents')}</p>}
         </div>
       </div>
     </Layout>

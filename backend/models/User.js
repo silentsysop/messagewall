@@ -23,7 +23,11 @@ const UserSchema = new mongoose.Schema({
   savedEvents: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Event'
-  }]
+  }],
+  customRole: {
+    name: String,
+    color: String
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);

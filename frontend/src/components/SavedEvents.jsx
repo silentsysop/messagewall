@@ -9,8 +9,10 @@ import Layout from './HUDlayout';
 import { format, isToday, isTomorrow, differenceInDays, isBefore } from 'date-fns';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
 import config from '../config';
+import { useTranslation } from 'react-i18next';
 
 export default function SavedEvents() {
+  const { t } = useTranslation();
   const [savedEvents, setSavedEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid');
@@ -56,13 +58,13 @@ export default function SavedEvents() {
     const now = new Date();
     
     if (isToday(eventDate)) {
-      return `Today at ${format(eventDate, 'h:mm a')}`;
+      return t('eventCard.today', { time: format(eventDate, 'h:mm a') });
     } else if (isTomorrow(eventDate)) {
-      return `Tomorrow at ${format(eventDate, 'h:mm a')}`;
+      return t('eventCard.tomorrow', { time: format(eventDate, 'h:mm a') });
     } else if (differenceInDays(eventDate, now) < 7) {
-      return format(eventDate, 'EEEE \'at\' h:mm a'); // e.g., "Friday at 2:30 PM"
+      return t('eventCard.thisWeek', { day: format(eventDate, 'EEEE'), time: format(eventDate, 'h:mm a') });
     } else {
-      return format(eventDate, 'MMM d \'at\' h:mm a'); // e.g., "Jun 15 at 2:30 PM"
+      return t('eventCard.future', { date: format(eventDate, 'MMM d'), time: format(eventDate, 'h:mm a') });
     }
   };
 
@@ -72,11 +74,11 @@ export default function SavedEvents() {
     const endDate = new Date(endTime);
 
     if (isBefore(endDate, now)) {
-      return 'Past event';
+      return t('eventCard.ended');
     } else if (isBefore(startDate, now)) {
-      return 'Ongoing';
+      return t('eventCard.ongoing');
     } else {
-      return `Starts ${formatEventTime(startDate)}`;
+      return t('eventCard.starts', { time: formatEventTime(startDate) });
     }
   };
 
@@ -130,7 +132,7 @@ export default function SavedEvents() {
   );
 
   if (isLoading) {
-    return <Layout><div>Loading...</div></Layout>;
+    return <Layout><div>{t('common.loading')}</div></Layout>;
   }
 
   return (
@@ -138,20 +140,20 @@ export default function SavedEvents() {
       <div className="container mx-auto py-8 px-4 md:px-6">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Saved Events</h1>
-            <p className="text-muted-foreground">Events you've bookmarked for later.</p>
+            <h1 className="text-2xl font-bold">{t('savedEvents.title')}</h1>
+            <p className="text-muted-foreground">{t('savedEvents.description')}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setViewMode('grid')} aria-label="Grid view">
+            <Button variant="ghost" size="icon" onClick={() => setViewMode('grid')} aria-label={t('mainPage.gridView')}>
               <LayoutGrid className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => setViewMode('list')} aria-label="List view">
+            <Button variant="ghost" size="icon" onClick={() => setViewMode('list')} aria-label={t('mainPage.listView')}>
               <List className="h-5 w-5" />
             </Button>
           </div>
         </div>
         {savedEvents.length === 0 ? (
-          <p>You haven't saved any events yet.</p>
+          <p>{t('savedEvents.noSavedEvents')}</p>
         ) : (
           <div className={viewMode === 'grid' ? 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-4'}>
             {savedEvents.map(renderEventCard)}

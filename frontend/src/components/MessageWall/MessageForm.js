@@ -6,11 +6,13 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { SendIcon, SmileIcon, XIcon } from 'lucide-react';
 import { logger } from '../../utils/logger'
+import { useTranslation } from 'react-i18next';
 
 const emojis = ['😀', '😂', '😍', '🤔', '👍', '👎', '🎉', '❤️', '🔥', '👀'];
 const MAX_CHARACTERS = 255;
 
 function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, isAdmin, cooldownEnabled, isChatLocked }) {
+  const { t } = useTranslation();
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
   const [showNameField, setShowNameField] = useState(true);
@@ -95,10 +97,10 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, is
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
+    <form onSubmit={handleSubmit} className="space-y-2">
       {replyTo && (
         <div className="flex items-center bg-muted p-2 rounded-md">
-          <span className="text-sm text-muted-foreground mr-2">Replying to {getReplyToUsername()}:</span>
+          <span className="text-sm text-muted-foreground mr-2">{t('messageForm.replyingTo', { user: getReplyToUsername() })}:</span>
           <span className="text-sm truncate flex-grow">{replyTo.content}</span>
           <Button type="button" variant="ghost" size="sm" onClick={() => setReplyTo(null)}>
             <XIcon className="w-4 h-4" />
@@ -111,7 +113,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, is
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Your Name"
+            placeholder={t('messageForm.yourName')}
             className="w-full sm:w-1/4 min-w-[100px]"
           />
         )}
@@ -121,9 +123,9 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, is
             type="text"
             value={content}
             onChange={handleContentChange}
-            placeholder={isChatLocked ? "Chat is locked" : (replyTo ? "Type your reply..." : "Type a message...")}
+            placeholder={isChatLocked ? t('messageForm.chatLocked') : (replyTo ? t('messageForm.typeReply') : t('messageForm.typeMessage'))}
             required
-            className="pr-20" // Increase right padding to make room for character count
+            className="pr-20"
             disabled={remainingCooldown > 0 || isChatLocked}
           />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
@@ -137,7 +139,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, is
                 size="icon" 
                 className="h-6 w-6"
                 onClick={() => setShowEmojiMenu(!showEmojiMenu)}
-                aria-label="Add emoji"
+                aria-label={t('messageForm.addEmoji')}
               >
                 <SmileIcon className="w-4 h-4" />
               </Button>
@@ -165,7 +167,7 @@ function MessageForm({ eventId, onMessageSent, replyTo, setReplyTo, cooldown, is
           className="whitespace-nowrap"
         >
           <SendIcon className="h-4 w-4 mr-2" />
-          {isChatLocked ? 'Chat Locked' : (cooldownEnabled && remainingCooldown > 0 ? `${remainingCooldown.toFixed(0)}s` : 'Send')}
+          {isChatLocked ? t('messageForm.chatLocked') : (cooldownEnabled && remainingCooldown > 0 ? t('messageForm.cooldown', { seconds: remainingCooldown.toFixed(0) }) : t('messageForm.send'))}
         </Button>
       </div>
     </form>

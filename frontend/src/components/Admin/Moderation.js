@@ -6,8 +6,10 @@ import api from '../../services/api';
 import Layout from '../HUDlayout';
 import { showSuccessToast, showErrorToast } from '../../utils/toast';
 import socket from '../../services/socket';
+import { useTranslation } from 'react-i18next';
 
 function Moderation() {
+  const { t } = useTranslation();
   const [pendingMessages, setPendingMessages] = useState([]);
 
   useEffect(() => {
@@ -67,9 +69,9 @@ function Moderation() {
   return (
     <Layout>
       <div className="container mx-auto py-8 px-4 md:px-6">
-        <h1 className="text-2xl font-bold mb-6">Message Moderation</h1>
+        <h1 className="text-2xl font-bold mb-6">{t('moderation.title')}</h1>
         {pendingMessages.length === 0 ? (
-          <p className="text-muted-foreground">No pending messages</p>
+          <p className="text-muted-foreground">{t('moderation.noPendingMessages')}</p>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {pendingMessages.map(message => (
@@ -77,11 +79,11 @@ function Moderation() {
                 <CardContent className="p-6">
                   <p className="font-semibold mb-2">{message.event.name}</p>
                   <p className="text-sm text-muted-foreground mb-2">
-                    By: {message.user ? message.user.username : message.name}
+                    {t('moderation.by', { user: message.user ? message.user.username : message.name })}
                   </p>
                   <p className="text-sm mb-4">{message.content}</p>
                   <p className="text-xs text-muted-foreground mb-4">
-                    Created at: {new Date(message.createdAt).toLocaleString()}
+                    {t('moderation.createdAt', { date: new Date(message.createdAt).toLocaleString() })}
                   </p>
                   <div className="flex justify-end space-x-2">
                     <Button
@@ -90,7 +92,7 @@ function Moderation() {
                       onClick={() => handleApprove(message._id)}
                     >
                       <CheckIcon className="h-4 w-4 mr-2" />
-                      Approve
+                      {t('moderation.approve')}
                     </Button>
                     <Button
                       variant="destructive"
@@ -98,7 +100,7 @@ function Moderation() {
                       onClick={() => handleDelete(message._id)}
                     >
                       <XIcon className="h-4 w-4 mr-2" />
-                      Delete
+                      {t('moderation.delete')}
                     </Button>
                   </div>
                 </CardContent>

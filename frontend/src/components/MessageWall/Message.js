@@ -4,8 +4,11 @@ import { Trash2, ReplyIcon, ThumbsUp, ThumbsDown } from 'lucide-react'; // Impor
 import api from '../../services/api';
 import { toast } from 'react-hot-toast'; // Import toast
 import { logger } from '../../utils/logger'
+import { useTranslation } from 'react-i18next';
+import { showConfirmToast, showErrorToast, showSuccessToast } from '../../utils/toast';
 
 function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
+  const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
   const [animate, setAnimate] = useState(false);
   const [userReaction, setUserReaction] = useState(message.userReaction); // Track user's reaction locally
@@ -75,6 +78,27 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
     return message.name || 'Anonymous';
   };
 
+  const renderRoleBadge = () => {
+    if (message.customRole) {
+      return (
+        <span 
+          className="badge custom-role-badge"
+          style={{ 
+            backgroundColor: message.customRole.color,
+            color: '#ffffff', // Default to white text
+          }}
+        >
+          {message.customRole.name}
+        </span>
+      );
+    } else if (isEventCreator) {
+      return <span className="badge event-creator-badge">Organizer</span>;
+    } else if (isOrganizer) {
+      return <span className="badge organizer-badge">Admin</span>;
+    }
+    return null;
+  };
+
   const handleReact = async (reaction) => {
     if (isProcessing) return; // Prevent multiple clicks
 
@@ -126,6 +150,28 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
     }
   };
 
+  const handleDelete = () => {
+    showConfirmToast(
+      t('message.confirmDelete'),
+      async () => {
+        try {
+          await onDelete();
+          showSuccessToast(t('message.messageDeleted'));
+        } catch (error) {
+          showErrorToast(t('message.errorDeleting'));
+        }
+      }
+    );
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content).then(() => {
+      showSuccessToast(t('message.messageCopied'));
+    }, (err) => {
+      console.error('Could not copy text: ', err);
+    });
+  };
+
   return (
     <div 
       className={`message ${animate ? 'animate' : ''} ${canDelete ? 'can-delete' : ''}`} 
@@ -134,15 +180,14 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
       <div className="message-bubble" ref={bubbleRef}>
         {message.replyTo && (
           <div className="replied-message">
-            <span className="replied-to">Replying to {message.replyTo.user ? message.replyTo.user.username : (message.replyTo.name || 'Anonymous')}:</span>
+            <span className="replied-to">{t('message.replyTo')} {message.replyTo.user ? message.replyTo.user.username : (message.replyTo.name || 'Anonymous')}:</span>
             <span className="replied-content">{message.replyTo.content}</span>
           </div>
         )}
         <div className="message-header">
           <div className="message-info">
-            <span className={`message-author ${isEventCreator ? 'event-creator' : isAdmin ? 'admin' : ''}`}>
-              {isEventCreator && <span className="badge event-creator-badge">Organizer</span>}
-              {!isEventCreator && isOrganizer && <span className="badge organizer-badge">Admin</span>}
+            <span className={`message-author ${isEventCreator ? 'event-creator' : isOrganizer ? 'admin' : ''}`}>
+              {renderRoleBadge()}
               {getDisplayName()}
             </span>
             <span className="message-time">
@@ -155,13 +200,14 @@ function Message({ message, canDelete, onDelete, onReply, event, isAdmin }) {
               onClick={() => onReply(message, () => document.getElementById('message-input').focus())}
             >
               <ReplyIcon size={14} />
+              
             </button>
             {canDelete && (
               <button 
                 className="delete-button" 
                 onClick={(e) => {
                   e.stopPropagation();
-                  onDelete();
+                  handleDelete();
                 }}
               >
                 <Trash2 size={14} />

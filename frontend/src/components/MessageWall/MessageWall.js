@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import socket from '../../services/socket';
@@ -12,20 +12,23 @@ import { Button } from '../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventSettingsModal } from '../EventSettingsModal';
 import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
+import { fi, enUS } from 'date-fns/locale';
 import { PollCreationModal } from '../PollCreationModal';
 import { PollDisplay } from '../PollDisplay';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { useTheme } from '../../context/ThemeContext';
 import { logger } from '../../utils/logger';
+import { useTranslation } from 'react-i18next';
 
 
 function MessageWall() {
+  const { t, i18n } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [event, setEvent] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeUsers, setActiveUsers] = useState(0);
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, loading, checkLoggedIn } = useAuth();
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -49,23 +52,52 @@ function MessageWall() {
     messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' });
   };
 
+  const fetchEvent = useCallback(async () => {
+    try {
+      const response = await api.get(`/events/${id}`);
+      setEvent(response.data);
+      setIsChatLocked(response.data.isChatLocked);
+      setCooldown(response.data.cooldownEnabled ? response.data.cooldown : 0);
+      console.log('Fetched event:', response.data);
+    } catch (error) {
+      console.error('Error fetching event:', error);
+    }
+  }, [id]);
 
   useEffect(() => {
     logger.log('MessageWall component mounted');
     fetchEvent();
     fetchMessages();
+    checkLoggedIn(); // Re-check the logged-in state when component mounts
   
     logger.log('Emitting join event for:', id);
     socket.emit('join event', id);
   
     socket.on('new message', (newMessage) => {
       logger.log('Received new message:', newMessage);
-      setMessages(prevMessages => [...prevMessages, newMessage]);
+      setMessages(prevMessages => {
+        // Check if the message already exists
+        const existingMessageIndex = prevMessages.findIndex(msg => msg._id === newMessage._id);
+        if (existingMessageIndex !== -1) {
+          // If it exists, update it
+          const updatedMessages = [...prevMessages];
+          updatedMessages[existingMessageIndex] = newMessage;
+          return updatedMessages;
+        } else {
+          // If it doesn't exist, add it
+          return [...prevMessages, newMessage];
+        }
+      });
       if (!isScrolled) {
         scrollToBottom();
       }
     });
 
+    socket.on('event updated', (updatedEventId) => {
+      if (updatedEventId === id) {
+        fetchEvent();
+      }
+    });
 
     socket.on('reaction updated', ({ messageId, reactions }) => {
       setMessages(prevMessages => prevMessages.map(msg => 
@@ -97,8 +129,15 @@ function MessageWall() {
       setActivePoll(prev => prev && prev._id === deletedPollId ? null : prev);
     });
   
-    socket.on('approval status changed', ({ requiresApproval }) => {
-      setEvent(prevEvent => ({ ...prevEvent, requiresApproval }));
+    socket.on('approval status changed', ({ eventId, requiresApproval }) => {
+      if (eventId === id) {
+        setEvent(prevEvent => ({ ...prevEvent, requiresApproval }));
+        // Update all messages to reflect the new approval status
+        setMessages(prevMessages => prevMessages.map(msg => ({
+          ...msg,
+          approved: requiresApproval ? msg.approved : true
+        })));
+      }
     });
   
     socket.on('message deleted', (deletedMessageId) => {
@@ -107,6 +146,14 @@ function MessageWall() {
   
     socket.on('chat lock changed', (lockStatus) => {
       setIsChatLocked(lockStatus);
+    });
+  
+    socket.on('user role updated', ({ userId, customRole }) => {
+      setMessages(prevMessages => prevMessages.map(message => 
+        message && message.user && message.user._id === userId 
+          ? { ...message, user: { ...message.user, customRole } }
+          : message
+      ));
     });
   
     return () => {
@@ -122,10 +169,12 @@ function MessageWall() {
       socket.off('approval status changed');
       socket.off('message deleted'); 
       socket.off('chat lock changed');
+      socket.off('user role updated');
+      socket.off('event updated');
       logger.log('Emitting leave event for:', id);
       socket.emit('leave event', id);
     };
-  }, [id, isScrolled]);
+  }, [id, isScrolled, fetchEvent]);
 
   useEffect(() => {
     if (isInitialLoad && messages.length > 0) {
@@ -176,18 +225,6 @@ function MessageWall() {
     fetchActivePoll();
   }, [id]);
 
-  const fetchEvent = async () => {
-    try {
-      const response = await api.get(`/events/${id}`);
-      setEvent(response.data);
-      setIsChatLocked(response.data.isChatLocked);
-      setCooldown(response.data.cooldownEnabled ? response.data.cooldown : 0);
-      console.log('Fetched event:', response.data);
-    } catch (error) {
-      console.error('Error fetching event:', error);
-    }
-  };
-
   const fetchMessages = async () => {
     try {
       const response = await api.get(`/messages/${id}`);
@@ -213,18 +250,20 @@ function MessageWall() {
       try {
         await navigator.share({
           title: event.name,
-          text: `Join the event: ${event.name}`,
+          text: t('messageWall.joinEvent'),
           url: window.location.href,
         });
       } catch (error) {
         console.error('Error sharing:', error);
+        showErrorToast(t('messageWall.shareError'));
       }
     } else {
       const shareUrl = window.location.href;
       navigator.clipboard.writeText(shareUrl).then(() => {
-        alert('Event link copied to clipboard!');
+        showSuccessToast(t('messageWall.linkCopied'));
       }, (err) => {
         console.error('Could not copy text: ', err);
+        showErrorToast(t('messageWall.shareError'));
       });
     }
   };
@@ -260,15 +299,22 @@ function MessageWall() {
   const formatEventStartTime = (date) => {
     const now = new Date();
     const startDate = new Date(date);
+    const locale = i18n.language === 'fi' ? fi : enUS;
     
     if (isToday(startDate)) {
-      return `Today at ${format(startDate, 'h:mm a')}`;
+      return t('eventCard.today', { time: format(startDate, 'HH:mm', { locale }) });
     } else if (isTomorrow(startDate)) {
-      return `Tomorrow at ${format(startDate, 'h:mm a')}`;
+      return t('eventCard.tomorrow', { time: format(startDate, 'HH:mm', { locale }) });
     } else if (differenceInDays(startDate, now) < 7) {
-      return format(startDate, 'EEEE \'at\' h:mm a'); // e.g., "Friday at 2:30 PM"
+      return t('eventCard.thisWeek', { 
+        day: format(startDate, 'EEEE', { locale }), 
+        time: format(startDate, 'HH:mm', { locale }) 
+      });
     } else {
-      return format(startDate, 'MMM d \'at\' h:mm a'); // e.g., "Jun 15 at 2:30 PM"
+      return t('eventCard.future', { 
+        date: format(startDate, 'd.M.', { locale }), 
+        time: format(startDate, 'HH:mm', { locale }) 
+      });
     }
   };
 
@@ -280,7 +326,7 @@ function MessageWall() {
   const handleVote = async (pollId, optionIndex) => {
     try {
       const response = await api.post(`/polls/${pollId}/vote`, { optionIndex });
-      setActivePoll(response.data);  // Update the poll state instead of setting it to null
+      setActivePoll(response.data);
     } catch (error) {
       console.error('Error voting on poll:', error);
       showErrorToast('Failed to submit vote');
@@ -312,7 +358,7 @@ function MessageWall() {
       return (
         <div className="flex items-center justify-center bg-red-500 text-white py-2">
           <Lock className="mr-2" />
-          <span>Chat is currently locked</span>
+          <span>{t('messageWall.chatLocked')}</span>
         </div>
       );
     }
@@ -329,6 +375,10 @@ function MessageWall() {
       showErrorToast('Failed to toggle chat lock');
     }
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Layout>
@@ -389,18 +439,18 @@ function MessageWall() {
               </div>
               <div className="flex items-center">
                 <UsersIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                <span>{activeUsers} active</span>
+                <span>{t('messageWall.activeUsers', { count: activeUsers })}</span>
               </div>
               {event.requiresApproval && (
                 <div className="flex items-center text-primary">
                   <ShieldIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                  <span>Moderated</span>
+                  <span>{t('messageWall.moderated')}</span>
                 </div>
               )}
               {cooldown > 0 && (
                 <div className="flex items-center text-primary">
                   <ClockIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                  <span>{cooldown}s</span>
+                  <span>{t('messageWall.cooldown', { seconds: cooldown })}</span>
                 </div>
               )}
             </div>
@@ -431,7 +481,7 @@ function MessageWall() {
               </div>
             )}
             <div className="px-4">
-              {messages.map((message, index) => (
+              {messages.filter(message => message && message._id).map((message, index) => (
                 <motion.div
                   key={message._id}
                   initial={{ opacity: 0, y: 20 }}
@@ -440,11 +490,11 @@ function MessageWall() {
                 >
                   <Message 
                     message={message}
-                    canDelete={canPerformAdminActions || (user && user._id === message.user._id)}
+                    canDelete={canPerformAdminActions}
                     onDelete={() => deleteMessage(message._id)}
                     onReply={handleReply}
                     event={event}
-                    isAdmin={user && user.role === 'organizer'}
+                    isAdmin={canPerformAdminActions}
                   />
                 </motion.div>
               ))}
@@ -468,7 +518,7 @@ function MessageWall() {
                   className="rounded-full shadow-lg"
                   onClick={() => scrollToBottom()}
                 >
-                  New messages
+                  {t('messageWall.newMessages')}
                 </Button>
               </motion.div>
             )}
@@ -515,6 +565,16 @@ function MessageWall() {
         eventId={id}
         isOrganizer={canPerformAdminActions}
       />
+      {event && event.endTime < new Date() && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+          {t('messageWall.eventEnded')}
+        </div>
+      )}
+      {event && event.startTime > new Date() && (
+        <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4">
+          {t('messageWall.eventNotStarted')}
+        </div>
+      )}
     </Layout>
   );
 }

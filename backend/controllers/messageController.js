@@ -1,6 +1,7 @@
 const Message = require('../models/Message');
 const Event = require('../models/Event');
 const MAX_MESSAGE_LENGTH = 255; // Add this at the top of the file
+const User = require('../models/User');
 
 
 exports.createMessage = async (req, res) => {
@@ -23,19 +24,22 @@ exports.createMessage = async (req, res) => {
       return res.status(400).json({ error: `Message content must be between 1 and ${MAX_MESSAGE_LENGTH} characters.` });
     }
 
+    const user = req.user ? await User.findById(req.user.id) : null;
+    
     const newMessage = new Message({
       content,
       event: eventId,
-      user: req.user ? req.user.id : null,
-      name: req.user ? req.user.username : (name || 'Anonymous'),
+      user: user ? user._id : null,
+      name: user ? user.username : (name || 'Anonymous'),
       approved: event.requiresApproval ? false : true,
-      replyTo: replyTo || null
+      replyTo: replyTo || null,
+      customRole: user ? user.customRole : null
     });
 
     const savedMessage = await newMessage.save();
     
     const populatedMessage = await Message.findById(savedMessage._id)
-      .populate('user', 'username role')
+      .populate('user', 'username role customRole')
       .populate('event', 'name')
       .populate({
         path: 'replyTo',
@@ -61,11 +65,11 @@ exports.createMessage = async (req, res) => {
 exports.getMessages = async (req, res) => {
   try {
     const messages = await Message.find({ event: req.params.eventId, approved: true })
-      .populate('user', 'username role')
+      .populate('user', 'username role customRole')
       .populate({
         path: 'replyTo',
         select: 'content user name',
-        populate: { path: 'user', select: 'username' }
+        populate: { path: 'user', select: 'username customRole' }
       })
       .sort({ createdAt: 1 });
     res.json(messages);
@@ -79,20 +83,15 @@ exports.approveMessage = async (req, res) => {
   const io = req.app.locals.io;
 
   try {
-    const message = await Message.findById(req.params.id)
-      .populate('user', 'username')
-      .populate({
-        path: 'replyTo',
-        populate: { path: 'user', select: 'username' }
-      });
+    const message = await Message.findById(req.params.id);
 
     if (!message) {
       return res.status(404).json({ msg: 'Message not found' });
     }
 
-    const event = await Event.findById(message.event);
-    if (event.organizer.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'User not authorized' });
+    // Check if the user has the 'organizer' role
+    if (req.user.role !== 'organizer') {
+      return res.status(403).json({ msg: 'User not authorized. Only organizers can approve messages.' });
     }
 
     message.approved = true;
@@ -100,14 +99,16 @@ exports.approveMessage = async (req, res) => {
 
     // Populate the message before emitting
     const populatedMessage = await Message.findById(message._id)
-      .populate('user', 'username')
+      .populate('user', 'username role customRole')
+      .populate('event', 'name')
       .populate({
         path: 'replyTo',
+        select: 'content user name',
         populate: { path: 'user', select: 'username' }
       });
 
     io.to(message.event.toString()).emit('new message', populatedMessage);
-    io.emit('message approved', message._id);
+    io.emit('message approved', populatedMessage._id);
 
     res.json(populatedMessage);
   } catch (error) {
@@ -124,8 +125,8 @@ exports.deleteMessage = async (req, res) => {
       return res.status(404).json({ msg: 'Message not found' });
     }
 
-    const event = await Event.findById(message.event);
-    if (event.organizer.toString() !== req.user.id && message.user.toString() !== req.user.id) {
+    // Check if the user is an organizer or the message creator
+    if (req.user.role !== 'organizer' && message.user.toString() !== req.user.id) {
       return res.status(401).json({ msg: 'User not authorized' });
     }
 

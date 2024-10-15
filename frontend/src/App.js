@@ -9,6 +9,7 @@ import EventCreation from './components/Admin/EventCreation';
 import Moderation from './components/Admin/Moderation';
 import PastEvents from './components/PastEvents';
 import { ThemeProvider } from './context/ThemeContext';
+import { AdminActions } from './components/AdminActions';
 
 import './globals.css';
 import MainPage from './components/MainPage';
@@ -57,6 +58,14 @@ function AppRoutes() {
         <Route path="/" element={<MainPage />} />
         <Route path="/saved-events" element={<SavedEvents />} />
         <Route path="/past-events" element={<PastEvents />} />
+        <Route
+          path="/admin-actions"
+          element={
+            <RequireAuth allowedRoles={['organizer']}>
+              <AdminActions />
+            </RequireAuth>
+          }
+        />
       </Routes>
     </Router>
   );

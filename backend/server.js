@@ -69,6 +69,10 @@ io.on('connection', (socket) => {
   socket.on('poll ended', (poll) => {
     io.to(poll.event.toString()).emit('poll ended', poll);
   });
+
+  socket.on('event updated', (eventId) => {
+    io.to(eventId.toString()).emit('event updated', eventId);
+  });
 });
 
 const PORT = process.env.PORT || 5000;
