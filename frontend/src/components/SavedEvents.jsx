@@ -90,7 +90,7 @@ export default function SavedEvents() {
       <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
         <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
           <img 
-            src={event.imageUrl ? `${config.socketUrl}${event.imageUrl}` : '/placeholder-event.jpg'} 
+            src={event.imageUrl ? `${config.socketUrl}${event.imageUrl}` : `${process.env.REACT_APP_BASENAME}placeholder.png`} 
             alt={event.name} 
             className="absolute inset-0 h-full w-full object-cover rounded-md"
           />

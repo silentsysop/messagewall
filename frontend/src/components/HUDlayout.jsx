@@ -92,7 +92,7 @@ export default function Layout({ children }) {
 
       <div className="flex flex-1 overflow-hidden">
         <motion.div
-          className="h-full flex-shrink-0"
+          className="h-full flex-shrink-0 hidden md:block"
           initial={false}
           animate={{
             width: isSidebarExpanded ? 240 : 64,

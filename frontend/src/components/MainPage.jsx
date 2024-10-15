@@ -175,8 +175,6 @@ export default function MainPage() {
       }
     };
 
-    const baseUrl = process.env.REACT_APP_BASENAME;
-
     return (
       <Card key={event._id} className={`group relative rounded-lg shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl ${viewMode === 'list' ? 'flex' : ''}`}>
         <Link to={`/event/${event._id}`} className="absolute inset-0 z-10">
@@ -185,7 +183,7 @@ export default function MainPage() {
         <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
           <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
             <img
-              src={event.imageUrl ? `${baseUrl}${event.imageUrl}` : './placeholder.jpg'}
+              src={event.imageUrl ? `${config.socketUrl}${event.imageUrl}` : `${process.env.REACT_APP_BASENAME}placeholder.png`}
               alt={event.name}
               className="absolute inset-0 h-full w-full object-cover rounded-md"
             />
