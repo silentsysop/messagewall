@@ -1,21 +1,18 @@
 require('dotenv').config();
-const config = require('./config/config');
 const socketIo = require('socket.io');
 const app = require('./app');
 const http = require('http');
 const server = http.createServer(app);
 
-console.log('config', config);
-
 const io = socketIo(server, {
   cors: {
-    origin: config.frontendUrl,
+    origin: process.env.FRONTEND_URL || '*',
     methods: ["GET", "POST"]
   },
-  path: process.env.SOCKET_IO_PATH || '/messagewall/socket.io'
+  path: process.env.SOCKET_IO_PATH || '/socket.io'
 });
 
-console.log('Socket.IO server initialized with path:', process.env.SOCKET_IO_PATH || '/messagewall/socket.io');
+console.log('Socket.IO server initialized with path:', process.env.SOCKET_IO_PATH || '/socket.io');
 
 // Set io object in app.locals to be accessible in routes
 app.locals.io = io;

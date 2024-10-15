@@ -175,6 +175,8 @@ export default function MainPage() {
       }
     };
 
+    const baseUrl = process.env.REACT_APP_BASENAME;
+
     return (
       <Card key={event._id} className={`group relative rounded-lg shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl ${viewMode === 'list' ? 'flex' : ''}`}>
         <Link to={`/event/${event._id}`} className="absolute inset-0 z-10">
@@ -182,9 +184,9 @@ export default function MainPage() {
         </Link>
         <CardContent className={`p-4 ${viewMode === 'list' ? 'flex flex-1' : ''}`}>
           <div className={`relative ${viewMode === 'grid' ? 'h-48 w-full mb-4' : 'h-24 w-24 mr-4 flex-shrink-0'}`}>
-            <img 
-              src={event.imageUrl ? `${config.socketUrl}${event.imageUrl}` : './placeholder.jpg'} 
-              alt={event.name} 
+            <img
+              src={event.imageUrl ? `${baseUrl}${event.imageUrl}` : './placeholder.jpg'}
+              alt={event.name}
               className="absolute inset-0 h-full w-full object-cover rounded-md"
             />
           </div>
@@ -210,9 +212,9 @@ export default function MainPage() {
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 ml-auto">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -220,8 +222,8 @@ export default function MainPage() {
                   }}
                   className="z-20 relative"
                 >
-                  <HeartIcon 
-                    className={`h-5 w-5 ${savedEvents.includes(event._id) ? 'fill-current text-red-500' : 'text-gray-500'}`} 
+                  <HeartIcon
+                    className={`h-5 w-5 ${savedEvents.includes(event._id) ? 'fill-current text-red-500' : 'text-gray-500'}`}
                   />
                 </Button>
                 {user && user.role === 'organizer' && (
@@ -240,7 +242,7 @@ export default function MainPage() {
                     </Button>
                     {showMenu[event._id] && (
                       <div className="absolute right-0 top-full mt-2 w-48 bg-background border border-muted rounded-md shadow-lg py-1 z-30">
-                        <button 
+                        <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -251,7 +253,7 @@ export default function MainPage() {
                           <MessageCircle className="h-4 w-4 mr-2" />
                           {event.requiresApproval ? 'Disable' : 'Enable'} Approval
                         </button>
-                        <button 
+                        <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -305,8 +307,8 @@ export default function MainPage() {
           )}
         </div>
       </div>
-      <CreateEventModal 
-        isOpen={isCreateModalOpen} 
+      <CreateEventModal
+        isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onEventCreated={handleEventCreated}
       />

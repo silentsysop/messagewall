@@ -1,8 +1,8 @@
 import io from 'socket.io-client';
 import { logger } from '../utils/logger';
 
-const socketURL = process.env.REACT_APP_SOCKET_URL;
-const socketPath = process.env.REACT_APP_SOCKET_PATH;
+const socketURL = process.env.REACT_APP_SOCKET_URL || 'https://ossi2.esedu.fi';
+const socketPath = process.env.REACT_APP_SOCKET_PATH || '/socket.io';
 
 logger.log('Attempting to connect to Socket.IO server:', socketURL);
 logger.log('Using Socket.IO path:', socketPath);
