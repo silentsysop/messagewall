@@ -309,9 +309,12 @@ function SidebarContent({ t, isExpanded, currentPath }) {
         <Link
           key={item.path}
           to={item.path}
-          className={`mb-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted hover:text-primary transition-colors ${
-            currentPath === item.path ? 'bg-muted text-primary' : ''
-          } ${isExpanded ? '' : 'justify-center'}`}
+          className={`mb-2 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200
+            ${currentPath === item.path 
+              ? 'bg-accent text-accent-foreground shadow-md' 
+              : 'text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground'
+            } 
+            ${isExpanded ? '' : 'justify-center'}`}
         >
           <item.icon className="h-5 w-5 flex-shrink-0" />
           {isExpanded && <span>{item.label}</span>}
