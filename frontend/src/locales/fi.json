@@ -60,7 +60,8 @@
       "leaveEvent": "Poistu tapahtumasta",
       "copyLink": "Kopioi tapahtuman linkki",
       "linkCopied": "Tapahtuman linkki kopioitu leikepöydälle",
-      "shareError": "Virhe tapahtuman jakamisessa"
+      "shareError": "Virhe tapahtuman jakamisessa",
+      "moderationNotice": "Viestit vaativat hyväksynnän tapahtuman järjestäjältä."
     },
     "messageForm": {
       "yourName": "Nimesi (valinnainen)",

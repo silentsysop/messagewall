@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "./ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar"
-import { SearchIcon, BellIcon, CalendarIcon, LogInIcon, UserPlusIcon, ShieldIcon, LogOutIcon, HeartIcon, Settings, Menu, ChevronDown, ChevronRight } from 'lucide-react';
+import { SearchIcon, BellIcon, CalendarIcon, LogInIcon, UserPlusIcon, ShieldIcon, LogOutIcon, HeartIcon, Settings, Menu, ChevronDown, ChevronRight, Linkedin, Github } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from './ui/ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -92,7 +92,7 @@ export default function Layout({ children }) {
 
       <div className="flex flex-1 overflow-hidden">
         <motion.div
-          className="h-full flex-shrink-0 hidden md:block"
+          className="h-full flex-shrink-0 hidden md:flex md:flex-col"
           initial={false}
           animate={{
             width: isSidebarExpanded ? 240 : 64,
@@ -109,6 +109,40 @@ export default function Layout({ children }) {
               <ChevronRight className={`h-5 w-5 transition-transform duration-300 ${isSidebarExpanded ? 'rotate-180' : ''}`} />
             </Button>
             <SidebarContent t={t} isExpanded={isSidebarExpanded} currentPath={location.pathname} />
+            
+            {/* Refined developers' credit */}
+            {isSidebarExpanded && (
+              <div className="mt-auto border-t border-muted">
+                <motion.div
+                  className="p-4 text-xs text-muted-foreground"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <p className="font-semibold mb-1">VAKS-Viestiseinä</p>
+                  <p className="opacity-75">Created by</p>
+                  <p>Tobias Lång & Ossi Hänninen</p>
+                  <div className="mt-2 flex items-center space-x-2">
+                    <a 
+                      href="https://www.linkedin.com/in/tobias-lång" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-accent"
+                    >
+                      <Linkedin className="h-4 w-4" />
+                    </a>
+                    <a 
+                      href="https://github.com/Tobsukka/messagewall" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-accent"
+                    >
+                      <Github className="h-4 w-4" />
+                    </a>
+                  </div>
+                </motion.div>
+              </div>
+            )}
           </nav>
         </motion.div>
 

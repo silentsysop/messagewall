@@ -60,7 +60,8 @@
       "leaveEvent": "Leave the event",
       "copyLink": "Copy event link",
       "linkCopied": "Event link copied to clipboard",
-      "shareError": "Error sharing event"
+      "shareError": "Error sharing event",
+      "moderationNotice": "Messages are subject to approval by the event organizer."
     },
     "messageForm": {
       "yourName": "Your Name (optional)",

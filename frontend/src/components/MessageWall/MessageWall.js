@@ -461,11 +461,11 @@ function MessageWall() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
-            className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-2 sm:p-4   rounded-r-lg text-xs sm:text-sm"
+            className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-2 sm:p-4 rounded-r-lg text-xs sm:text-sm"
           >
             <div className="flex items-center">
               <AlertTriangle className="w-4 h-4 mr-2" />
-              <p className="font-medium">Messages are subject to approval by the event organizer.</p>
+              <p className="font-medium">{t('messageWall.moderationNotice')}</p>
             </div>
           </motion.div>
         )}
