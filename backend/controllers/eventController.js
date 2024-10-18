@@ -309,8 +309,8 @@ const endPoll = async (pollId, io) => {
     // Emit socket event to notify clients that the poll has ended
     io.to(poll.event.toString()).emit('poll ended', poll);
 
-    // Schedule poll deletion after 10 seconds
-    setTimeout(() => deletePoll(pollId, io), 10000);
+    // Schedule poll deletion after 20 seconds
+    setTimeout(() => deletePoll(pollId, io), 20000);
   } catch (error) {
     console.error('Error ending poll:', error);
   }

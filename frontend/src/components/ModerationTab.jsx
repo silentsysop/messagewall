@@ -6,6 +6,7 @@ import { CheckIcon, XIcon } from 'lucide-react';
 import api from '../services/api';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
 import { useTranslation } from 'react-i18next';
+import socket from '../services/socket';
 
 export function ModerationTab({ eventId }) {
   const { t } = useTranslation();
@@ -13,6 +14,25 @@ export function ModerationTab({ eventId }) {
 
   useEffect(() => {
     fetchPendingMessages();
+
+    // Socket event listeners
+    socket.on('new message to moderate', (newMessage) => {
+      setPendingMessages(prevMessages => [...prevMessages, newMessage]);
+    });
+
+    socket.on('message approved', (messageId) => {
+      setPendingMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+    });
+
+    socket.on('message deleted', (messageId) => {
+      setPendingMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+    });
+
+    return () => {
+      socket.off('new message to moderate');
+      socket.off('message approved');
+      socket.off('message deleted');
+    };
   }, [eventId]);
 
   const fetchPendingMessages = async () => {
