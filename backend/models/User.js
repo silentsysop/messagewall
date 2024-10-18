@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
   customRole: {
     name: String,
     color: String
+  },
+  isNotificationsMuted: {
+    type: Boolean,
+    default: false
   }
 }, { timestamps: true });
 

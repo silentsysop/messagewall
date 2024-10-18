@@ -47,3 +47,24 @@ exports.unsaveEvent = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+exports.getMutePreference = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    res.json({ isNotificationsMuted: user.isNotificationsMuted });
+  } catch (error) {
+    console.error('Error fetching mute preference:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.updateMutePreference = async (req, res) => {
+  try {
+    const { isNotificationsMuted } = req.body;
+    const user = await User.findByIdAndUpdate(req.user.id, { isNotificationsMuted }, { new: true });
+    res.json({ isNotificationsMuted: user.isNotificationsMuted });
+  } catch (error) {
+    console.error('Error updating mute preference:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};

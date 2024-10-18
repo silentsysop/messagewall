@@ -73,6 +73,11 @@ io.on('connection', (socket) => {
   socket.on('event updated', (eventId) => {
     io.to(eventId.toString()).emit('event updated', eventId);
   });
+
+  socket.on('join organizer room', (userId) => {
+    socket.join(userId);
+    console.log(`Organizer ${userId} joined their personal room`);
+  });
 });
 
 const PORT = process.env.PORT || 5000;

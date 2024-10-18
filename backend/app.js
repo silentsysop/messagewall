@@ -9,6 +9,7 @@ const path = require('path');
 const userRoutes = require('./routes/userRoutes');
 const pollRoutes = require('./routes/pollRoutes');
 const roleRoutes = require('./routes/roleRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use(`${BASE_URL}/messages`, messageRoutes);
 app.use(`${BASE_URL}/users`, userRoutes);
 app.use(`${BASE_URL}/polls`, pollRoutes);
 app.use(`${BASE_URL}/roles`, roleRoutes);
+app.use(`${BASE_URL}/notifications`, notificationRoutes);
 
 // Serve static files in uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

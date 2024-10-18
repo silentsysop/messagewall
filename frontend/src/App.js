@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
@@ -11,6 +11,7 @@ import PastEvents from './components/PastEvents';
 import { ThemeProvider } from './context/ThemeContext';
 import { AdminActions } from './components/AdminActions';
 import { NotificationProvider } from './context/NotificationContext';
+import socket from './services/socket';  // Make sure to import socket
 
 import './globals.css';
 import MainPage from './components/MainPage';
@@ -30,7 +31,14 @@ function RequireAuth({ children, allowedRoles }) {
   return children;
 }
 
-function AppRoutes() {
+function AppContent() {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user && user.role === 'organizer') {
+      socket.emit('join organizer room', user._id);
+    }
+  }, [user]);
 
   const basename = process.env.REACT_APP_BASENAME || '';
 
@@ -77,7 +85,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <NotificationProvider>
-          <AppRoutes />
+          <AppContent />
           <Toaster
             position="top-center"
             reverseOrder={true}

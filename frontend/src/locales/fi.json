@@ -222,7 +222,12 @@
     "notifications": {
       "title": "Ilmoitukset",
       "noNotifications": "Ei uusia ilmoituksia",
-      "clearAll": "Tyhjennä kaikki",
-      "markAsRead": "Merkitse luetuksi"
+      "markAsRead": "Hylkää",
+      "dismissAll": "Hylkää kaikki",
+      "toggle": "Näytä/piilota ilmoitukset",
+      "close": "Sulje ilmoitukset",
+      "newMessageModeration": "Uusi viesti vaatii moderointia tapahtumassa: ",
+      "mute": "Mykistä ilmoitukset",
+      "unmute": "Poista mykistys"
     }
   }

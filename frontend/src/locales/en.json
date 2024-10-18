@@ -221,7 +221,12 @@
     "notifications": {
       "title": "Notifications",
       "noNotifications": "No new notifications",
-      "clearAll": "Clear all",
-      "markAsRead": "Mark as read"
+      "markAsRead": "Dismiss",
+      "dismissAll": "Dismiss All",
+      "toggle": "View notifications",
+      "close": "Close notifications",
+      "newMessageModeration": "New message requires moderation in event: ",
+      "mute": "Mute notifications",
+      "unmute": "Unmute notifications"
     }
   }

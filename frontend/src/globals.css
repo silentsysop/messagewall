@@ -76,3 +76,74 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
+
+/* Add this to your globals.css file */
+
+.notification-icon {
+  @apply flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center;
+  background: radial-gradient(circle, var(--icon-bg-light) 0%, var(--icon-bg-dark) 100%);
+}
+
+.notification-icon-moderation {
+  --icon-bg-light: hsl(var(--accent) / 0.2);
+  --icon-bg-dark: hsl(var(--accent) / 0.3);
+  @apply text-accent;
+}
+
+.notification-icon-event {
+  --icon-bg-light: hsl(var(--primary) / 0.2);
+  --icon-bg-dark: hsl(var(--primary) / 0.3);
+  @apply text-primary;
+}
+
+.notification-icon-message {
+  --icon-bg-light: hsl(var(--secondary) / 0.2);
+  --icon-bg-dark: hsl(var(--secondary) / 0.3);
+  @apply text-secondary;
+}
+
+.notification-icon-default {
+  --icon-bg-light: hsl(var(--muted) / 0.2);
+  --icon-bg-dark: hsl(var(--muted) / 0.3);
+  @apply text-muted-foreground;
+}
+
+.notification-title {
+  @apply text-sm font-medium text-foreground leading-5;
+}
+
+.notification-subtitle {
+  @apply text-xs text-muted-foreground;
+}
+
+.notification-action {
+  @apply text-xs font-medium text-muted-foreground hover:text-accent hover:bg-accent/10 rounded-full p-1 transition-colors duration-200;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+:root {
+  --scrollbar-track: theme('colors.gray.100');
+  --scrollbar-thumb: theme('colors.gray.300');
+}
+
+.dark {
+  --scrollbar-track: theme('colors.gray.800');
+  --scrollbar-thumb: theme('colors.gray.600');
+}

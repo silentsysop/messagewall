@@ -2,6 +2,7 @@ const Message = require('../models/Message');
 const Event = require('../models/Event');
 const MAX_MESSAGE_LENGTH = 255; // Add this at the top of the file
 const User = require('../models/User');
+const { createNotification, deleteNotification } = require('./notificationController');
 
 
 exports.createMessage = async (req, res) => {
@@ -53,6 +54,23 @@ exports.createMessage = async (req, res) => {
     } else {
       console.log('Emitting new message to moderate');
       io.emit('new message to moderate', populatedMessage);
+    }
+
+    if (!savedMessage.approved) {
+      const organizers = await User.find({ role: 'organizer' });
+      for (const organizer of organizers) {
+        console.log('Creating notification for event:', event._id); // Add this log
+        const notification = await createNotification(
+          organizer._id,
+          `New message requires moderation in event: ${event.name}`,
+          'moderation',
+          savedMessage._id,
+          event._id
+        );
+        console.log('Created notification:', notification); // Add this log
+        // Emit socket event for real-time updates
+        io.to(organizer._id.toString()).emit('new notification', notification);
+      }
     }
 
     res.status(201).json(populatedMessage);
@@ -110,6 +128,8 @@ exports.approveMessage = async (req, res) => {
     io.to(message.event.toString()).emit('new message', populatedMessage);
     io.emit('message approved', populatedMessage._id);
 
+    await deleteNotification(message._id);
+
     res.json(populatedMessage);
   } catch (error) {
     console.error(error.message);
@@ -134,6 +154,8 @@ exports.deleteMessage = async (req, res) => {
     
     // Emit a 'message deleted' event to all clients in the event room
     io.to(message.event.toString()).emit('message deleted', req.params.id);
+    
+    await deleteNotification(req.params.id);
     
     res.json({ msg: 'Message removed' });
   } catch (error) {
