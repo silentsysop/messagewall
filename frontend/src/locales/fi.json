@@ -218,5 +218,11 @@
       "title": "Ylläpitäjän toiminnot",
       "moderate": "Moderoi viestejä",
       "customRoles": "Mukautettujen roolien hallinta"
+    },
+    "notifications": {
+      "title": "Ilmoitukset",
+      "noNotifications": "Ei uusia ilmoituksia",
+      "clearAll": "Tyhjennä kaikki",
+      "markAsRead": "Merkitse luetuksi"
     }
   }

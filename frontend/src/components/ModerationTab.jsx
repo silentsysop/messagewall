@@ -7,10 +7,12 @@ import api from '../services/api';
 import { showSuccessToast, showErrorToast } from '../utils/toast';
 import { useTranslation } from 'react-i18next';
 import socket from '../services/socket';
+import { useNotifications } from '../context/NotificationContext';
 
 export function ModerationTab({ eventId }) {
   const { t } = useTranslation();
   const [pendingMessages, setPendingMessages] = useState([]);
+  const { clearNotification } = useNotifications();
 
   useEffect(() => {
     fetchPendingMessages();
@@ -48,6 +50,7 @@ export function ModerationTab({ eventId }) {
     try {
       await api.put(`/messages/approve/${messageId}`);
       setPendingMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+      clearNotification(messageId);
       showSuccessToast(t('moderation.messageApproved'));
     } catch (error) {
       console.error('Error approving message:', error);
@@ -59,6 +62,7 @@ export function ModerationTab({ eventId }) {
     try {
       await api.delete(`/messages/${messageId}`);
       setPendingMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+      clearNotification(messageId);
       showSuccessToast(t('moderation.messageDeleted'));
     } catch (error) {
       console.error('Error deleting message:', error);

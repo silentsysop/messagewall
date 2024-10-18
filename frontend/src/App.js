@@ -10,6 +10,7 @@ import Moderation from './components/Admin/Moderation';
 import PastEvents from './components/PastEvents';
 import { ThemeProvider } from './context/ThemeContext';
 import { AdminActions } from './components/AdminActions';
+import { NotificationProvider } from './context/NotificationContext';
 
 import './globals.css';
 import MainPage from './components/MainPage';
@@ -75,21 +76,23 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppRoutes />
-        <Toaster
-          position="top-center"
-          reverseOrder={true}
-          toastOptions={{
-            duration: 5000,
-            style: {
-              background: 'hsl(var(--background))',
-              color: 'hsl(var(--foreground))',
-              border: '1px solid hsl(var(--border))',
-              padding: '8px',
-              borderRadius: 'var(--radius)',
-            },
-          }}
-        />
+        <NotificationProvider>
+          <AppRoutes />
+          <Toaster
+            position="top-center"
+            reverseOrder={true}
+            toastOptions={{
+              duration: 5000,
+              style: {
+                background: 'hsl(var(--background))',
+                color: 'hsl(var(--foreground))',
+                border: '1px solid hsl(var(--border))',
+                padding: '8px',
+                borderRadius: 'var(--radius)',
+              },
+            }}
+          />
+        </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>
   );

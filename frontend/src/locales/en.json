@@ -217,5 +217,11 @@
       "title": "Admin Actions",
       "moderate": "Moderate Messages",
       "customRoles": "Custom Role Management"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "noNotifications": "No new notifications",
+      "clearAll": "Clear all",
+      "markAsRead": "Mark as read"
     }
   }

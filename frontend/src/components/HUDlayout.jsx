@@ -8,6 +8,150 @@ import { ThemeToggle } from './ui/ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNotifications } from '../context/NotificationContext';
+import { Bell, X } from 'lucide-react';
+import { format } from 'date-fns';
+
+// Define NotificationBell component first
+const NotificationBell = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { notifications, clearNotification, clearAllNotifications } = useNotifications();
+  const { t } = useTranslation();
+
+  return (
+    <div className="relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative"
+      >
+        <Bell className="h-5 w-5" />
+        <AnimatePresence>
+          {notifications.length > 0 && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full"
+            >
+              {notifications.length}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </Button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-lg overflow-hidden z-50"
+          >
+            <div className="p-4 border-b border-border">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">{t('notifications.title')}</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  {t('notifications.noNotifications')}
+                </div>
+              ) : (
+                notifications.map((notif) => (
+                  <motion.div
+                    key={notif.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="p-4 border-b border-border hover:bg-accent/5 transition-colors duration-200"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-sm font-medium">{notif.content}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {format(new Date(notif.createdAt), 'PPp')}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => clearNotification(notif.id)}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+            {notifications.length > 0 && (
+              <div className="p-4 border-t border-border">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAllNotifications}
+                  className="w-full"
+                >
+                  {t('notifications.clearAll')}
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+function DesktopNavItems({ user, showAuthLinks, t }) {
+  return (
+    <div className="hidden sm:flex items-center gap-4">
+      <Link to="/" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
+        <CalendarIcon className="h-5 w-5"  />
+        <span>{t('common.events')}</span>
+      </Link>
+      {user ? (
+        <>
+          {user.role === 'organizer' && (
+            <Link to="/moderate" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
+              <ShieldIcon className="h-5 w-5" />
+              <span>{t('common.moderate')}</span>
+            </Link>
+          )}
+          <Button variant="ghost" size="icon" aria-label={t('common.search')}>
+            <SearchIcon className="h-5 w-5" />
+          </Button>
+          <NotificationBell />
+          <UserMenu user={user} t={t} />
+        </>
+      ) : (
+        showAuthLinks && (
+          <>
+            <Link to="/login" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
+              <LogInIcon className="h-5 w-5" />
+              <span>{t('common.login')}</span>
+            </Link>
+            <Link to="/register" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
+              <UserPlusIcon className="h-5 w-5" />
+              <span>{t('common.register')}</span>
+            </Link>
+          </>
+        )
+      )}
+    </div>
+  );
+}
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth();
@@ -19,6 +163,8 @@ export default function Layout({ children }) {
   const location = useLocation();
 
   const showAuthLinks = process.env.REACT_APP_SHOW_AUTH_LINKS !== 'false';
+
+  const { notifications, clearNotification, clearAllNotifications } = useNotifications();
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -150,47 +296,6 @@ export default function Layout({ children }) {
           {children}
         </main>
       </div>
-    </div>
-  );
-}
-
-function DesktopNavItems({ user, showAuthLinks, t }) {
-  return (
-    <div className="hidden sm:flex items-center gap-4">
-      <Link to="/" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
-        <CalendarIcon className="h-5 w-5"  />
-        <span>{t('common.events')}</span>
-      </Link>
-      {user ? (
-        <>
-          {user.role === 'organizer' && (
-            <Link to="/moderate" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
-              <ShieldIcon className="h-5 w-5" />
-              <span>{t('common.moderate')}</span>
-            </Link>
-          )}
-          <Button variant="ghost" size="icon" aria-label={t('common.search')}>
-            <SearchIcon className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" aria-label={t('common.notifications')}>
-            <BellIcon className="h-5 w-5" />
-          </Button>
-          <UserMenu user={user} t={t} />
-        </>
-      ) : (
-        showAuthLinks && (
-          <>
-            <Link to="/login" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
-              <LogInIcon className="h-5 w-5" />
-              <span>{t('common.login')}</span>
-            </Link>
-            <Link to="/register" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
-              <UserPlusIcon className="h-5 w-5" />
-              <span>{t('common.register')}</span>
-            </Link>
-          </>
-        )
-      )}
     </div>
   );
 }
